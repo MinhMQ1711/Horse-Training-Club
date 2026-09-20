@@ -4,11 +4,13 @@ Hệ thống quản lý CLB đua ngựa (đồ án SWP391). File này Claude Cod
 Đọc hết trước khi code.
 
 ## Tech stack
-- React + TypeScript + Vite. Router: react-router-dom.
+- React + TypeScript + **Next.js (App Router)** — giảng viên yêu cầu. Routing theo thư mục trong `src/app/`, không dùng react-router-dom.
+- Component có state/sự kiện (useState, onClick...) phải khai báo `"use client"` ở dòng đầu file.
+- Import bằng alias `@/` (trỏ tới `src/`).
 - Style: CSS thuần + CSS Modules (`*.module.css`). KHÔNG Tailwind, KHÔNG UI kit ngoài.
 - Không thêm thư viện mới nếu chưa hỏi ý kiến.
 - Backend (làm riêng) là REST API theo MVC. FE gọi qua `src/lib/api.ts`, xác thực bằng session cookie.
-- Chưa có API thì chạy bằng mock: `VITE_USE_MOCK=true` trong `.env.local`.
+- Chưa có API thì chạy bằng mock: `NEXT_PUBLIC_USE_MOCK=true` trong `.env.local` (biến phải có tiền tố `NEXT_PUBLIC_` mới đọc được ở trình duyệt).
 
 ## Ngôn ngữ
 - Toàn bộ chữ trên giao diện: TIẾNG ANH.
@@ -22,7 +24,9 @@ Hệ thống quản lý CLB đua ngựa (đồ án SWP391). File này Claude Cod
 
 ## Cấu trúc thư mục
 src/
-  app/            App.tsx, router.tsx (mọi route khai báo ở đây, bọc RoleGuard)
+  app/            Next.js App Router: layout.tsx, page.tsx. MỖI ROUTE là một thư mục chứa page.tsx
+                  MỎNG, chỉ re-export trang thật từ features/*/pages. Route cần quyền bọc RoleGuard.
+                  Nhóm route dùng thư mục có ngoặc, ví dụ (auth)/login, (app)/accounts.
   features/       Chia theo NGHIỆP VỤ (flow), không chia theo vai trò
     auth/         P1  Landing, Login, SignUp, VerifyEmail, ForgotPassword,
                       ResetPassword, AcceptInvite, MyProfile, Forbidden403, SessionExpired
@@ -44,7 +48,7 @@ src/
                   EmptyState, LockBanner, DisabledHint (nút disable + tooltip lý do)
     form/         Field, Select, DatePicker, FileUpload, PasswordStrength
   lib/
-    api.ts        Gói fetch: gắn cookie, chuyển sang mock khi VITE_USE_MOCK=true,
+    api.ts        Gói fetch: gắn cookie, chuyển sang mock khi NEXT_PUBLIC_USE_MOCK=true,
                   401 → mở SessionExpired, 403 → trang Forbidden403
     auth.ts       currentUser, login/logout, trạng thái phiên
     permissions.ts  Bảng vai trò → chức năng. Sidebar và RoleGuard đều đọc từ đây
@@ -71,6 +75,7 @@ src/
 - Sign Up chỉ cho Horse Owner. Nhân viên được Club Manager mời qua email.
 - Owner chỉ ACTIVE khi đã gắn ≥ 1 ngựa (qua màn Horse Intake).
 - Forgot Password luôn trả thông báo trung tính.
+- **Xác minh email luôn bằng mã OTP gửi về email, KHÔNG dùng link.** Forgot Password = nhập email → nhập OTP → đặt mật khẩu mới. Design Claude Design còn ghi "reset link" thì sửa theo quy tắc này.
 - Mock phải có ít nhất 1 tài khoản cho mỗi vai trò và mỗi trạng thái.
 
 ## Phân công

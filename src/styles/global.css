@@ -1,0 +1,36 @@
+/* Reset tối thiểu + nền tảng chữ/màu cho toàn app. Mọi giá trị lấy từ tokens.css. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+}
+
+a {
+  color: var(--brand-700);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--brand-600);
+  text-decoration: underline;
+}
+
+/* Trợ năng: focus luôn thấy rõ, không bao giờ tắt outline. */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
