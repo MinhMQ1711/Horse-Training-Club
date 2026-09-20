@@ -1,0 +1,50 @@
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AuthLayout, HERO_TEAM } from "@/components/layout/AuthLayout";
+import { formatDateTime } from "@/lib/format";
+import { useQueryParams } from "@/lib/hooks";
+import { verifyEmail } from "../api";
+import { signupFlow } from "../flow";
+import { OtpVerifyForm } from "../components/OtpVerifyForm";
+
+// Bước 2 của đăng ký: nhập mã OTP gửi về email. Đúng mã => yêu cầu chuyển tới Club Manager.
+export default function VerifyEmailPage() {
+  const router = useRouter();
+  const params = useQueryParams();
+  const email = params?.get("email") ?? "";
+
+  useEffect(() => {
+    if (params && !email) router.replace("/sign-up");
+  }, [params, email, router]);
+
+  if (!email) return null;
+
+  return (
+    <AuthLayout
+      hero={HERO_TEAM}
+      title="Verify your email."
+      description={`Enter the 6-digit code sent to ${email}. It confirms that the address is yours.`}
+    >
+      <OtpVerifyForm
+        email={email}
+        purpose="signup"
+        sentTitle="Code sent"
+        sentBody={(t) => `Sent at ${formatDateTime(t.sentAt)}. The code can be used once and expires at ${formatDateTime(t.expiresAt).split(" · ")[1]}.`}
+        submitLabel="Verify email"
+        onVerify={async (code) => {
+          const result = await verifyEmail(email, code);
+          signupFlow.set(result);
+          router.push("/sign-up/pending");
+        }}
+        footer={
+          <>
+            Wrong address? <Link href="/sign-up">Start over</Link>
+          </>
+        }
+      />
+    </AuthLayout>
+  );
+}
