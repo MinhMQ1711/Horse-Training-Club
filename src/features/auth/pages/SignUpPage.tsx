@@ -13,17 +13,21 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { ApiError } from "@/lib/api";
 import { messageFor } from "@/lib/messages";
+import { passwordError } from "@/lib/password";
+import type { Role } from "@/types/auth";
 import { register } from "../api";
 import styles from "./AuthPages.module.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Chỉ Horse Owner được tự đăng ký. Các vai trò khác vẫn HIỆN nhưng bị khóa kèm lời giải thích (không ẩn).
+// SRS US-F1-01: ai cũng đăng ký được, rồi chờ Club Manager duyệt và gán vai trò.
+// Club Manager vẫn HIỆN nhưng bị khóa kèm lời giải thích (không ẩn).
 const ROLE_OPTIONS = [
   { value: "HORSE_OWNER", label: "Horse Owner" },
-  { value: "HEAD_TRAINER", label: "Head Trainer (created by the Club Manager)", disabled: true },
-  { value: "VETERINARIAN", label: "Veterinarian (created by the Club Manager)", disabled: true },
-  { value: "GROOM", label: "Groom / Stable Hand (created by the Club Manager)", disabled: true },
+  { value: "HEAD_TRAINER", label: "Head Trainer" },
+  { value: "VETERINARIAN", label: "Veterinarian" },
+  { value: "GROOM", label: "Groom / Stable Hand" },
+  { value: "CLUB_MANAGER", label: "Club Manager (created by an existing Club Manager)", disabled: true },
 ];
 
 type Errors = Partial<Record<"name" | "email" | "password" | "confirm", string>>;
@@ -32,6 +36,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<Exclude<Role, "CLUB_MANAGER">>("HORSE_OWNER");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [agree, setAgree] = useState(false);
@@ -63,7 +68,7 @@ export default function SignUpPage() {
     if (!mail) next.email = "Club email is required.";
     else if (!EMAIL_RE.test(mail)) next.email = "Email must look like name@equiflow.vn.";
     if (!password) next.password = "Password is required.";
-    else if (password.length < 8) next.password = "Password must be at least 8 characters.";
+    else if (passwordError(password)) next.password = passwordError(password);
     if (confirm !== password) next.confirm = "The two passwords do not match.";
     if (Object.keys(next).length > 0) return fail(next);
 
@@ -71,7 +76,7 @@ export default function SignUpPage() {
     setErrors({});
     setAlertBody("");
     try {
-      await register({ fullName: name.trim(), email: mail, role: "HORSE_OWNER", password });
+      await register({ fullName: name.trim(), email: mail, role, password });
       // Bước kế tiếp: nhập mã OTP gửi về email.
       router.push(`/sign-up/verify?email=${encodeURIComponent(mail)}`);
     } catch (err) {
@@ -128,15 +133,15 @@ export default function SignUpPage() {
           />
         </Field>
 
-        <Field label="Role requested" required hint="Only Horse Owner accounts can be requested here. Staff accounts are created by the Club Manager.">
-          <Select options={ROLE_OPTIONS} value="HORSE_OWNER" onChange={() => {}} />
+        <Field label="Role requested" required hint="The Club Manager reviews the request and grants the role. Club Manager accounts are created only by an existing Club Manager.">
+          <Select options={ROLE_OPTIONS} value={role} onChange={(e) => setRole(e.target.value as Exclude<Role, "CLUB_MANAGER">)} />
         </Field>
 
         <Field label="Password" required error={errors.password}>
           <Input
             type="password"
             icon="key"
-            placeholder="At least 8 characters"
+            placeholder="At least 8 characters, with a capital letter and a digit"
             autoComplete="new-password"
             value={password}
             onChange={(e) => {

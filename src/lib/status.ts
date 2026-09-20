@@ -7,7 +7,6 @@ export type BadgeTone = "ok" | "warn" | "danger" | "info" | "neutral" | "violet"
 export const ACCOUNT_STATUS: Record<AccountStatus, { label: string; tone: BadgeTone }> = {
   PENDING_EMAIL: { label: "Email not verified", tone: "warn" },
   PENDING_APPROVAL: { label: "Pending Approval", tone: "warn" },
-  PENDING_INTAKE: { label: "Pending Intake", tone: "warn" },
   INVITED: { label: "Invited", tone: "info" },
   ACTIVE: { label: "Active", tone: "ok" },
   INACTIVE: { label: "Inactive", tone: "neutral" },
@@ -21,7 +20,7 @@ export type AccountTab = "ALL" | "PENDING" | "ACTIVE" | "LOCKED";
 export function tabOf(status: AccountStatus): AccountTab {
   if (status === "ACTIVE") return "ACTIVE";
   if (status === "LOCKED") return "LOCKED";
-  if (status === "PENDING_EMAIL" || status === "PENDING_APPROVAL" || status === "PENDING_INTAKE" || status === "INVITED") {
+  if (status === "PENDING_EMAIL" || status === "PENDING_APPROVAL" || status === "INVITED") {
     return "PENDING";
   }
   return "ALL";

@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout
       title="Reset your password."
-      description="Enter the club email of the account. A 6-digit code follows by email and stays valid for 10 minutes."
+      description="Enter the club email of the account. A 6-digit code follows by email and stays valid for 15 minutes."
     >
       <form onSubmit={onSubmit} noValidate style={{ display: "contents" }}>
         {failure && (

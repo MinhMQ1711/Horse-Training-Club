@@ -2,7 +2,7 @@
 // Mỗi route trả dữ liệu hoặc ném ApiError(status, code, ...) giống backend thật sẽ làm,
 // nhờ vậy khi đổi sang backend thật, giao diện không phải sửa.
 //
-// Mã OTP demo luôn là 123456 (hiệu lực 10 phút, gửi lại sau 60 giây, sai tối đa 5 lần).
+// Mã OTP demo luôn là 123456 (hiệu lực 15 phút, gửi lại sau 60 giây, sai tối đa 5 lần).
 
 import { ApiError } from "@/lib/api";
 import type { HttpMethod } from "@/lib/api";
@@ -14,7 +14,7 @@ import type { Db, OtpPurpose, OtpRecord } from "@/mock/db";
 import type { Account, NotifyKey, PermissionKey, PermissionMap, Role } from "@/types/auth";
 
 const OTP_CODE = "123456";
-const OTP_TTL = 10 * 60 * 1000;
+const OTP_TTL = 15 * 60 * 1000;
 const OTP_COOLDOWN = 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 const LOGIN_MAX_FAILS = 5;
@@ -147,7 +147,6 @@ const routes: Route[] = [
         LOCKED: [423, "ACCOUNT_LOCKED"],
         PENDING_APPROVAL: [403, "ACCOUNT_PENDING"],
         PENDING_EMAIL: [403, "EMAIL_NOT_VERIFIED"],
-        PENDING_INTAKE: [403, "PENDING_INTAKE"],
         INVITED: [403, "ACCOUNT_INVITED"],
         INACTIVE: [403, "ACCOUNT_INACTIVE"],
         REJECTED: [403, "ACCOUNT_REJECTED"],
@@ -195,8 +194,11 @@ const routes: Route[] = [
       const email = norm(body.email);
       const fullName = String(body.fullName ?? "").trim();
       const role = body.role as Role;
-      if (role !== "HORSE_OWNER") throw new ApiError(403, "ROLE_NOT_ALLOWED", "Only Horse Owner can self-register");
-      if (!fullName || !EMAIL_RE.test(email) || String(body.password ?? "").length < 8) {
+      // SRS: ai cũng đăng ký được (trừ Club Manager) rồi chờ Club Manager duyệt và gán vai trò.
+      if (!["HEAD_TRAINER", "VETERINARIAN", "GROOM", "HORSE_OWNER"].includes(role)) {
+        throw new ApiError(403, "ROLE_NOT_ALLOWED", "This role cannot be requested");
+      }
+      if (!fullName || !EMAIL_RE.test(email) || passwordError(String(body.password ?? ""))) {
         throw new ApiError(400, "VALIDATION", "Invalid input");
       }
       const existing = db.accounts.find((a) => a.email.toLowerCase() === email);

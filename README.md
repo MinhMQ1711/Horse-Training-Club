@@ -402,12 +402,11 @@ Quy trình hằng ngày (routine), khẩu phần ăn (rations), công việc (ta
 | `HORSE_OWNER` | Chủ ngựa |
 | `CLUB_MANAGER` | Quản lý CLB |
 
-### 7 trạng thái tài khoản
+### 6 trạng thái tài khoản
 
 | Mã | Ý nghĩa |
 |---|---|
 | `PENDING_EMAIL` | Owner đã đăng ký, chưa xác nhận email |
-| `PENDING_INTAKE` | Đã xác nhận email, chờ được gắn ngựa (qua Horse Intake) |
 | `INVITED` | Nhân viên được mời, chưa nhận lời mời |
 | `ACTIVE` | Đang hoạt động |
 | `INACTIVE` | Ngưng hoạt động |
@@ -416,8 +415,7 @@ Quy trình hằng ngày (routine), khẩu phần ăn (rations), công việc (ta
 
 ### Quy tắc nghiệp vụ
 
-- **Sign Up chỉ dành cho Horse Owner.** Nhân viên được **Club Manager mời qua email**.
-- Owner chỉ `ACTIVE` khi đã gắn **≥ 1 ngựa** (qua màn Horse Intake).
+- **Đăng ký (SRS):** ai cũng đăng ký được (trừ Club Manager) → nhập OTP → chờ Club Manager duyệt và gán vai trò.
 - **Forgot Password luôn trả thông báo trung tính.**
 - **Xác minh email luôn bằng mã OTP gửi về email, không dùng link.** Quên mật khẩu = nhập email → nhập OTP → đặt mật khẩu mới.
 - **Horse Owner chỉ thấy ngựa của mình.** Truy cập ngựa của người khác → `Forbidden403`.

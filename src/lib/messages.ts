@@ -16,8 +16,8 @@ const GENERIC: Record<string, string> = {
   NETWORK_ERROR: "The service did not answer. Check the connection and try again.",
   SERVICE_UNAVAILABLE: "The service did not answer. Nothing was changed. Try again in a moment.",
   EMAIL_TAKEN: "This email already has an account in the system.",
-  ROLE_NOT_ALLOWED: "Only Horse Owner accounts can be requested here. Staff accounts are created by the Club Manager.",
-  WEAK_PASSWORD: "Add an uppercase letter, a digit or a symbol.",
+  ROLE_NOT_ALLOWED: "Club Manager accounts are created only by an existing Club Manager.",
+  WEAK_PASSWORD: "Password needs an uppercase letter and a digit.",
   CANNOT_LOCK_SELF: "You cannot lock your own account. Ask another Club Manager.",
   LAST_MANAGER: "The club must keep at least one active Club Manager.",
   RESET_EXPIRED: "This reset session has expired. Request a new code.",
@@ -131,17 +131,6 @@ export function loginFailure(err: unknown): LoginFailure {
           body: "Use the invitation email from the Club Manager to set a password before signing in.",
         },
         blockedReason: "The invitation must be accepted first.",
-        footNote: who,
-      };
-    case "PENDING_INTAKE":
-      return {
-        alert: {
-          tone: "warn",
-          icon: "clock",
-          title: "Waiting for horse intake",
-          body: "The account becomes active once at least one horse is assigned to it at intake.",
-        },
-        blockedReason: "The Club Manager assigns a horse at intake first.",
         footNote: who,
       };
     case "ACCOUNT_INACTIVE":

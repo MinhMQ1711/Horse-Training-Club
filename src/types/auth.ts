@@ -9,7 +9,6 @@ export const ROLES: Role[] = ["HEAD_TRAINER", "VETERINARIAN", "GROOM", "HORSE_OW
 export type AccountStatus =
   | "PENDING_EMAIL"
   | "PENDING_APPROVAL"
-  | "PENDING_INTAKE"
   | "INVITED"
   | "ACTIVE"
   | "INACTIVE"

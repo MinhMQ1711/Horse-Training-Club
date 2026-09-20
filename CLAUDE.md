@@ -16,10 +16,17 @@ Hệ thống quản lý CLB đua ngựa (đồ án SWP391). File này Claude Cod
 - Toàn bộ chữ trên giao diện: TIẾNG ANH.
 - Comment code và commit message: tiếng Việt hoặc tiếng Anh đều được.
 
+## Tài liệu nghiệp vụ (nguồn đúng về NGHIỆP VỤ)
+Thư mục D:\Tailieu_Project:
+- SRS_Phan1_Gioi_thieu_UserStory_UseCase_ERD.md — user story, use case, ERD, giá trị mặc định (OTP, mật khẩu, session...). **Khi mâu thuẫn, SRS thắng.**
+- Danh_sach_uu_tien_Flow.md — thứ tự làm 7 flow (Flow 1–5 bắt buộc, Flow 6 chuồng trại và Flow 7 thi đấu đã xác nhận làm).
+- Master_Prompt_SRS_Workflow_Screen.md, SWP391_Context_Document.md — bối cảnh môn học và phạm vi.
+- Ngoài phạm vi: thanh toán thật, gửi email/SMS tự động, mô hình 3D, video, chat, thiết bị đo thật.
+
 ## Nguồn thiết kế (thứ tự ưu tiên)
 1. Gói handoff từ Claude Design (dự án EquiFlow) — là bản CHUẨN về giao diện.
 2. EquiFlow Design System — nguồn của `src/styles/tokens.css`.
-3. Prototype cũ, CHỈ ĐỌC để tham khảo nội dung: `D:\Tailieu_AI\NewHorse\NewHorse`
+3. Prototype cũ, CHỈ ĐỌC để tham khảo nội dung: `D:\Tailieu_Project\NewHorse`
    (không sửa, không đọc thư mục NewHorseWebBackup).
 
 ## Cấu trúc thư mục
@@ -69,13 +76,17 @@ src/
 7. Trợ năng: label cho mọi input, focus-visible rõ, dùng được bằng bàn phím.
 8. Mỗi trang mới phải có dữ liệu mock tương ứng để chạy được khi chưa có API.
 
-## Tài khoản & trạng thái (khớp thiết kế)
+## Tài khoản & trạng thái (theo SRS phần 1 + design)
 - Vai trò: HEAD_TRAINER, VETERINARIAN, GROOM, HORSE_OWNER, CLUB_MANAGER.
-- Trạng thái: PENDING_EMAIL, PENDING_INTAKE, INVITED, ACTIVE, INACTIVE, REJECTED, LOCKED.
-- Sign Up chỉ cho Horse Owner. Nhân viên được Club Manager mời qua email.
-- Owner chỉ ACTIVE khi đã gắn ≥ 1 ngựa (qua màn Horse Intake).
-- Forgot Password luôn trả thông báo trung tính.
-- **Xác minh email luôn bằng mã OTP gửi về email, KHÔNG dùng link.** Forgot Password = nhập email → nhập OTP → đặt mật khẩu mới. Design Claude Design còn ghi "reset link" thì sửa theo quy tắc này.
+- Trạng thái: PENDING_EMAIL, PENDING_APPROVAL, INVITED, ACTIVE, INACTIVE, REJECTED, LOCKED.
+- **Đăng ký (SRS US-F1-01):** ai cũng đăng ký được, chọn vai trò MUỐN xin (4 vai trò, không có Club Manager).
+  Luồng: nhập form → nhập mã OTP gửi về email → tài khoản ở trạng thái PENDING_APPROVAL → Club Manager duyệt và gán vai trò → ACTIVE.
+  Club Manager chỉ do Club Manager hiện có tạo.
+- **Xác minh email luôn bằng mã OTP 6 số gửi về email, KHÔNG dùng link.** OTP hết hạn sau 15 phút, dùng 1 lần, gửi lại sau 60 giây, sai tối đa 5 lần.
+- **Quên mật khẩu:** nhập email → nhập OTP → đặt mật khẩu mới. Luôn trả thông báo trung tính (không lộ email có tồn tại hay không).
+- **Mật khẩu:** ít nhất 8 ký tự, có chữ HOA và chữ SỐ (backend hash bcrypt).
+- **Khóa đăng nhập:** sai 5 lần liên tiếp → khóa tạm 15 phút. **Phiên** hết hạn sau 30 phút không thao tác.
+- Horse Owner CHỈ XEM (read-only): chỉ thấy ngựa của mình, không có nút sửa/xóa; truy cập ngựa khác → Forbidden403.
 - Mock phải có ít nhất 1 tài khoản cho mỗi vai trò và mỗi trạng thái.
 
 ## Phân công

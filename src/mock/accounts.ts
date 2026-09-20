@@ -54,14 +54,10 @@ export function seedAccounts(): Account[] {
       id: "khoi", fullName: "Vũ Đình Khôi", email: "khoi.vu@equiflow.vn", role: "HORSE_OWNER", status: "ACTIVE",
       phone: "0918 777 043", lastActive: "2026-09-15T09:51:00",
     }),
-    // ---- bổ sung để phủ đủ 8 trạng thái ----
+    // ---- bổ sung để phủ đủ 7 trạng thái ----
     make({
       id: "ngoc", fullName: "Trịnh Bảo Ngọc", email: "ngoc.trinh@equiflow.vn", role: "HORSE_OWNER", status: "PENDING_EMAIL",
       requestedAt: "2026-09-19T08:05:00", requestCode: "REQ-2609-013",
-    }),
-    make({
-      id: "huy", fullName: "Hoàng Gia Huy", email: "huy.hoang@equiflow.vn", role: "HORSE_OWNER", status: "PENDING_INTAKE",
-      requestedAt: "2026-09-16T10:20:00", requestCode: "REQ-2609-011",
     }),
     make({ id: "tung", fullName: "Ngô Thanh Tùng", email: "tung.ngo@equiflow.vn", role: "GROOM", status: "INVITED" }),
     make({

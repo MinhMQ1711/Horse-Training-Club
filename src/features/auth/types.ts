@@ -1,3 +1,5 @@
+import type { Role } from "@/types/auth";
+
 // Kiểu dữ liệu riêng của feature auth (khớp phản hồi của các route /auth/* ở backend).
 
 export type OtpPurpose = "signup" | "reset";
@@ -12,7 +14,7 @@ export interface OtpTimes {
 export interface RegisterInput {
   fullName: string;
   email: string;
-  role: "HORSE_OWNER"; // chỉ Horse Owner được tự đăng ký; nhân viên do Club Manager tạo
+  role: Exclude<Role, "CLUB_MANAGER">; // vai trò MUỐN xin; Club Manager duyệt và gán vai trò (SRS US-F1-01)
   password: string;
 }
 

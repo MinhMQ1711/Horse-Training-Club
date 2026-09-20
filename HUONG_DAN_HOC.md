@@ -27,7 +27,6 @@ Mọi tài khoản đều có mật khẩu **`equiflow123`**. Mã OTP demo luôn
 | `binh.pham@equiflow.vn` | Groom | **LOCKED** | Đăng nhập → thông báo bị khóa, nút bị chặn có tooltip |
 | `anh.nguyen@equiflow.vn` | Horse Owner | **PENDING_APPROVAL** | Đăng nhập → "chờ duyệt" |
 | `ngoc.trinh@equiflow.vn` | Horse Owner | PENDING_EMAIL | Đăng nhập → "chưa xác minh email" |
-| `huy.hoang@equiflow.vn` | Horse Owner | PENDING_INTAKE | "Chờ tiếp nhận ngựa" |
 | `tung.ngo@equiflow.vn` | Groom | INVITED | "Chưa nhận lời mời" |
 | `khang.dang@equiflow.vn` | Veterinarian | INACTIVE | "Tài khoản ngưng hoạt động" |
 | `trang.bui@equiflow.vn` | Horse Owner | REJECTED | "Yêu cầu bị từ chối" |
@@ -36,7 +35,7 @@ Bài thử hay nhất để hiểu RBAC:
 1. Đăng nhập Club Manager → Accounts → **Permissions** của Trần Văn Nam → tắt "Create and edit Training Plans" → xác nhận → Save.
 2. Đăng xuất, đăng nhập Nam → mục **Training Plans biến mất** khỏi sidebar. Gõ `/plans` → trang **403**.
 
-Dữ liệu giả nằm trong `localStorage` của trình duyệt. Muốn về dữ liệu ban đầu: DevTools → Application → xóa key `equiflow.mock.db.v1`.
+Dữ liệu giả nằm trong `localStorage` của trình duyệt. Muốn về dữ liệu ban đầu: DevTools → Application → xóa key `equiflow.mock.db.v2`.
 Thêm `?mockError=1` vào URL `/accounts` để xem trạng thái lỗi tải danh sách.
 
 ---
@@ -117,7 +116,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 
 **J. OTP (mã xác minh qua email)** — `OtpInput.tsx`, `OtpVerifyForm.tsx`, `mock/handlers.ts`
 - Quy tắc dự án: **mọi xác minh email dùng mã OTP, không dùng link.**
-- Backend (mock) sinh mã, hiệu lực **10 phút**, gửi lại sau **60 giây**, sai tối đa **5 lần**.
+- Backend (mock) sinh mã, hiệu lực **15 phút** (theo SRS), gửi lại sau **60 giây**, sai tối đa **5 lần**.
 - Quên mật khẩu **luôn trả thông báo trung tính** (không cho biết email có tồn tại) — kể cả bước nhập OTP.
 - `OtpInput`: 6 ô, hỗ trợ dán cả chuỗi, Backspace lùi ô, phím ← →, tự điền của điện thoại (`autoComplete="one-time-code"`).
 - `useCountdown` (trong `lib/hooks.ts`) đếm ngược thời hạn và thời gian chờ gửi lại.
@@ -125,7 +124,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 **K. Mock backend** — `mock/handlers.ts`, `mock/db.ts`, `mock/accounts.ts`
 - `handleMock(method, path, body)` khớp đường dẫn bằng regex, trả dữ liệu hoặc ném `ApiError` y như backend thật.
 - Dữ liệu lưu trong `localStorage` để thay đổi còn nguyên khi chuyển trang. Mật khẩu **không bao giờ** gửi xuống giao diện (`toPublic`).
-- Phủ đủ **5 vai trò và 8 trạng thái** (quy tắc dự án).
+- Phủ đủ **5 vai trò và 7 trạng thái** (quy tắc dự án).
 
 ### Biết qua là đủ
 
@@ -144,7 +143,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 | Đổi vai trò nào thấy menu nào / được quyền gì | `src/lib/permissions.ts` |
 | Đổi câu báo lỗi | `src/lib/messages.ts` |
 | Đổi nhãn/màu của một trạng thái tài khoản | `src/lib/status.ts` |
-| Đổi hạn OTP, số lần sai, thời gian chờ gửi lại | hằng số đầu `src/mock/handlers.ts` (backend thật sẽ do server quyết định) |
+| Đổi hạn OTP (15 phút theo SRS), số lần sai, thời gian chờ gửi lại | hằng số đầu `src/mock/handlers.ts` (backend thật sẽ do server quyết định) |
 | Đổi thời gian hết phiên (30 phút) | `IDLE_MS` trong `src/components/layout/AuthProvider.tsx` |
 | Thêm tài khoản mẫu | `src/mock/accounts.ts` |
 | Trang đăng nhập / đăng ký / OTP | `src/features/auth/pages/` |
@@ -174,7 +173,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 ## 5. Bài tập để tự tay làm (tăng độ hiểu)
 
 1. **Dễ:** đổi thời gian hiệu lực OTP từ 10 phút sang 5 phút (`OTP_TTL`), thử lại luồng quên mật khẩu, thấy đồng hồ đếm ngược thay đổi.
-2. **Dễ:** thêm một tài khoản mẫu vai trò Groom trạng thái ACTIVE trong `mock/accounts.ts` (xóa key `equiflow.mock.db.v1` để dữ liệu mới có hiệu lực).
+2. **Dễ:** thêm một tài khoản mẫu vai trò Groom trạng thái ACTIVE trong `mock/accounts.ts` (xóa key `equiflow.mock.db.v2` để dữ liệu mới có hiệu lực).
 3. **Vừa:** thêm mục "Notifications" vào sidebar Club Manager (`ROLE_NAV.CLUB_MANAGER` trong `permissions.ts`). Bấm vào → thấy trang "sắp có". Hiểu vì sao không cần tạo route.
 4. **Vừa:** tạo route thật `/stalls` (thay trang "sắp có") theo đúng quy ước: viết `features/master-data/pages/StallMapPage.tsx`, tạo `src/app/(app)/stalls/page.tsx` một dòng re-export.
 5. **Khó:** thêm quyền thứ 13 (ví dụ `exportReports`): thêm khóa vào `types/auth.ts`, một mục trong `PERMISSIONS` và `DEFAULT_ON`. Xem nó tự xuất hiện trong màn Permissions.
@@ -187,9 +186,9 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 |---|---|---|
 | Quên mật khẩu bằng **link** trong email | Bằng **mã OTP** 3 bước: email → OTP → mật khẩu mới | Quyết định của chủ dự án |
 | Sign Up không xác minh email | Thêm bước **nhập OTP** rồi mới tới "chờ duyệt" | Cùng quyết định về OTP |
-| Sign Up cho chọn 4 vai trò | Vẫn hiện 4 vai trò nhưng chỉ chọn được **Horse Owner** | Quy tắc dự án: nhân viên do Club Manager mời |
+| Sign Up cho chọn 4 vai trò | Chọn được cả 4 vai trò (Club Manager bị khóa kèm lời giải thích); sau OTP chờ Club Manager duyệt và gán vai trò | SRS US-F1-01 |
 | Nút "Filter by role", "Create account" chỉ là hình | Có chức năng: lọc theo vai trò; tạo tài khoản nhân viên (trạng thái INVITED) | Cần cho demo |
-| 7 tài khoản mẫu | 12 tài khoản | Quy tắc dự án: mỗi vai trò **và mỗi trạng thái** đều có tài khoản mẫu |
+| 7 tài khoản mẫu | 11 tài khoản | Quy tắc dự án: mỗi vai trò **và mỗi trạng thái** đều có tài khoản mẫu |
 | Tiêu đề 1.4 là "Set a new password." (trùng 1.6) | "Reset your password." | Lỗi chép trong design |
 
 ---

@@ -145,8 +145,8 @@ export default function ChangePasswordPage() {
         <div className={styles.side}>
           <Card title="Club password rules">
             <ul className={styles.rules}>
-              <li>At least 8 characters, and not one of the last three used.</li>
-              <li>A mix of upper and lower case, digits or a symbol.</li>
+              <li>At least 8 characters, with an uppercase letter and a digit.</li>
+              <li>Not one of the last three passwords used.</li>
               <li>Changed every 180 days; a reminder arrives 14 days ahead.</li>
               <li>Five wrong attempts lock the account for 15 minutes.</li>
             </ul>

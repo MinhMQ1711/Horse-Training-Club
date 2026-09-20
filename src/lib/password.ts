@@ -37,6 +37,6 @@ export function strengthOf(pw: string): Strength {
 export function passwordError(pw: string): string {
   if (!pw) return "New password is required.";
   if (pw.length < 8) return "Password must be at least 8 characters.";
-  if (scorePassword(pw) < 2) return "Add an uppercase letter, a digit or a symbol.";
+  if (!/[A-Z]/.test(pw) || !/[0-9]/.test(pw)) return "Password needs an uppercase letter and a digit.";
   return "";
 }

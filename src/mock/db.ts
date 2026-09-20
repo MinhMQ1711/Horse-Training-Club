@@ -5,7 +5,7 @@
 import { seedAccounts } from "@/mock/accounts";
 import type { Account, PublicAccount } from "@/types/auth";
 
-const KEY = "equiflow.mock.db.v1";
+const KEY = "equiflow.mock.db.v2";
 
 export type OtpPurpose = "signup" | "reset";
 
