@@ -34,3 +34,17 @@ a:hover {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
 }
+
+/* Chữ chỉ dành cho trình đọc màn hình (ví dụ lý do một nút bị khóa). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

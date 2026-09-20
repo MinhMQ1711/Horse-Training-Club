@@ -4,7 +4,7 @@
 
 Đây là phần **giao diện web (Frontend)**. Backend là REST API theo mô hình MVC, do nhóm khác làm riêng. Trong lúc backend chưa xong, FE chạy bằng **dữ liệu giả (mock)**.
 
-> **Trạng thái hiện tại:** mới có **khung thư mục** (skeleton) trên nền Next.js, kèm tokens/font/global CSS đã nạp. Các file trong `src/lib` và `api.ts`/`types.ts` của từng feature đang **rỗng**, chờ được viết. README này mô tả cả những gì **đã có** lẫn những gì **sẽ được viết vào từng chỗ**, để cả nhóm biết mỗi thứ nằm đâu và dùng để làm gì.
+> **Trạng thái hiện tại:** đã làm xong **Phase 0 (đăng nhập) và Priority 1** — đăng ký, xác minh email bằng OTP, quên mật khẩu, khung app (Sidebar/Topbar), phân quyền RBAC, danh sách tài khoản, quyền từng tài khoản, 403, hết phiên, hồ sơ và đổi mật khẩu (16 route). Các feature còn lại (`horses`, `training`, `health`...) mới có khung thư mục. **Đọc [HUONG_DAN_HOC.md](HUONG_DAN_HOC.md)** để hiểu code, có tài khoản demo, mã OTP demo và câu hỏi vấn đáp mẫu.
 
 ---
 
@@ -151,6 +151,7 @@ equiflow-web/
 | `.env.local` | Biến môi trường **thật** của máy bạn. **Không commit**. Tạo bằng cách copy từ `.env.example` | Tùy máy |
 | `CLAUDE.md` | Quy tắc dự án cho Claude Code (công cụ AI): cấu trúc, quy tắc, cách làm việc. Người trong nhóm cũng nên đọc | Khi nhóm đổi quy ước |
 | `README.md` | Tài liệu bạn đang đọc | Khi cấu trúc thay đổi |
+| `HUONG_DAN_HOC.md` | Hướng dẫn học: tài khoản demo, giải thích code, kiến thức cần học, câu hỏi vấn đáp | Khi thêm tính năng lớn |
 
 ---
 
@@ -243,7 +244,7 @@ Các thành phần dùng ở **nhiều feature**. Viết trước, feature dùng
 
 ### 6.4 `src/lib/` — logic dùng chung
 
-Các file **không có giao diện**, chỉ chứa logic. Hiện tại cả 5 file đều **đang rỗng**.
+Các file **không có giao diện**, chỉ chứa logic. Cả 5 file đã được viết (kèm `session.ts`, `hooks.ts`, `format.ts`, `password.ts`, `navigation.ts`, `cx.ts` là các hàm phụ dùng chung).
 
 | File | Chức năng |
 |---|---|
