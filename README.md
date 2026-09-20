@@ -4,7 +4,7 @@
 
 Đây là phần **giao diện web (Frontend)**. Backend là REST API theo mô hình MVC, do nhóm khác làm riêng. Trong lúc backend chưa xong, FE chạy bằng **dữ liệu giả (mock)**.
 
-> **Trạng thái hiện tại:** mới có **khung thư mục** (skeleton). Các file trong `src/lib`, `src/styles` và `api.ts`/`types.ts` của từng feature đang **rỗng**, chờ được viết. README này mô tả cả những gì **đã có** lẫn những gì **sẽ được viết vào từng chỗ**, để cả nhóm biết mỗi thứ nằm đâu và dùng để làm gì.
+> **Trạng thái hiện tại:** đã làm xong **Phase 0 (đăng nhập) và Priority 1** — đăng ký, xác minh email bằng OTP, quên mật khẩu, khung app (Sidebar/Topbar), phân quyền RBAC, danh sách tài khoản, quyền từng tài khoản, 403, hết phiên, hồ sơ và đổi mật khẩu (16 route). Các feature còn lại (`horses`, `training`, `health`...) mới có khung thư mục. **Đọc [HUONG_DAN_HOC.md](HUONG_DAN_HOC.md)** để hiểu code, có tài khoản demo, mã OTP demo và câu hỏi vấn đáp mẫu.
 
 ---
 
@@ -16,8 +16,8 @@
 4. [File ở thư mục gốc](#4-file-ở-thư-mục-gốc)
 5. [`public/` — file tĩnh](#5-public--file-tĩnh)
 6. [`src/` — mã nguồn](#6-src--mã-nguồn)
-   - [6.1 Các file lõi](#61-các-file-lõi-đang-có-từ-template-vite)
-   - [6.2 `app/`](#62-srcapp)
+   - [6.1 Các file lõi](#61-các-file-lõi)
+   - [6.2 `app/`](#62-srcapp--routing-của-nextjs)
    - [6.3 `components/`](#63-srccomponents--thành-phần-dùng-chung)
    - [6.4 `lib/`](#64-srclib--logic-dùng-chung)
    - [6.5 `mock/`](#65-srcmock--dữ-liệu-giả)
@@ -35,7 +35,7 @@
 
 ## 1. Chạy dự án
 
-Yêu cầu: **Node.js ≥ 20.19** (đang dùng v24) và npm.
+Yêu cầu: **Node.js ≥ 20.9** (đang dùng v24) và npm. Dự án dùng **Next.js 16**.
 
 ```bash
 git clone https://github.com/MinhMQ1711/Horse-Training-Club.git
@@ -49,10 +49,10 @@ Trên Windows PowerShell, thay `cp` bằng `Copy-Item .env.example .env.local`.
 
 | Lệnh | Tác dụng |
 |---|---|
-| `npm run dev` | Chạy server phát triển (Vite), tự tải lại khi sửa code |
-| `npm run build` | Kiểm tra kiểu TypeScript (`tsc -b`) rồi đóng gói ra `dist/`. **Phải chạy không lỗi trước khi báo xong việc** |
+| `npm run dev` | Chạy server phát triển của Next.js tại http://localhost:3000, tự tải lại khi sửa code |
+| `npm run build` | Kiểm tra kiểu TypeScript và đóng gói ra thư mục `.next/`. **Phải chạy không lỗi trước khi báo xong việc** |
+| `npm run start` | Chạy bản đã build (phải `npm run build` trước) |
 | `npm run lint` | Kiểm tra lỗi code bằng Oxlint |
-| `npm run preview` | Chạy thử bản đã build |
 
 ### Biến môi trường
 
@@ -60,8 +60,10 @@ Khai báo trong `.env.local` (file này **không** được đưa lên Git). Fil
 
 | Biến | Giá trị mặc định | Ý nghĩa |
 |---|---|---|
-| `VITE_API_URL` | `http://localhost:8080/api` | Địa chỉ backend thật |
-| `VITE_USE_MOCK` | `true` | `true` = dùng dữ liệu giả trong `src/mock/`, không gọi backend. Đổi thành `false` khi backend đã sẵn sàng |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8080/api` | Địa chỉ backend thật |
+| `NEXT_PUBLIC_USE_MOCK` | `true` | `true` = dùng dữ liệu giả trong `src/mock/`, không gọi backend. Đổi thành `false` khi backend đã sẵn sàng |
+
+Tiền tố `NEXT_PUBLIC_` là **bắt buộc** để Next.js cho phép code chạy trên trình duyệt đọc biến đó. Biến không có tiền tố chỉ đọc được ở phía server.
 
 > Đổi `.env.local` xong phải **dừng và chạy lại** `npm run dev` thì mới có hiệu lực.
 
@@ -69,8 +71,10 @@ Khai báo trong `.env.local` (file này **không** được đưa lên Git). Fil
 
 ## 2. Tech stack và quy ước chung
 
-- **React 19 + TypeScript + Vite 8**.
-- **Router:** `react-router-dom` 7.
+- **React 19 + TypeScript + Next.js 16 (App Router)**. Dùng Next.js theo yêu cầu của giảng viên.
+- **Routing:** theo thư mục trong `src/app/` (không dùng `react-router-dom`). Xem [mục 6.2](#62-srcapp--routing-của-nextjs).
+- **`"use client"`:** file component có state hoặc sự kiện (`useState`, `onClick`...) phải có dòng `"use client"` ở đầu file.
+- **Alias import:** `@/` trỏ tới `src/` (ví dụ `import { Button } from "@/components/ui/Button"`).
 - **Style:** CSS thuần + **CSS Modules** (file `*.module.css`). **Không** dùng Tailwind, **không** dùng thư viện UI ngoài.
 - **Không thêm thư viện mới** nếu chưa hỏi ý kiến cả nhóm.
 - **Xác thực:** session cookie (backend set cookie, FE chỉ gửi kèm khi gọi API).
@@ -94,24 +98,18 @@ equiflow-web/
 ├── .oxlintrc.json          Cấu hình lint
 ├── CLAUDE.md               Quy tắc dự án cho Claude Code
 ├── README.md               File này
-├── index.html              Trang HTML gốc của Vite
 ├── package.json            Khai báo thư viện và lệnh npm
 ├── package-lock.json       Khóa phiên bản thư viện
-├── tsconfig.json           TypeScript: file "điều phối"
-├── tsconfig.app.json       TypeScript cho code trong src/
-├── tsconfig.node.json      TypeScript cho vite.config.ts
-├── vite.config.ts          Cấu hình Vite
+├── tsconfig.json           Cấu hình TypeScript (gồm alias @/ → src/)
+├── next-env.d.ts           (tự sinh, không commit) Khai báo kiểu cho Next.js
+├── .next/                  (tự sinh, không commit) Kết quả build
 │
 ├── public/                 File tĩnh, phục vụ nguyên xi
-│   ├── favicon.svg
-│   ├── icons.svg
-│   └── fonts/              Font chữ của hệ thống
+│   ├── fonts/              Font chữ của hệ thống
+│   └── images/             Logo Five Gates + ảnh editorial của trang đăng nhập
 │
 └── src/                    TOÀN BỘ mã nguồn nằm ở đây
-    ├── main.tsx            Điểm khởi động ứng dụng
-    ├── App.tsx  App.css  index.css   (file mẫu Vite, sẽ thay thế)
-    ├── assets/             Ảnh/SVG mẫu của Vite
-    ├── app/                Vỏ ứng dụng: App.tsx + router.tsx
+    ├── app/                Routing của Next.js: layout.tsx, page.tsx, mỗi route một thư mục
     ├── components/         Thành phần DÙNG CHUNG
     │   ├── layout/         Khung trang: AppShell, Sidebar, Topbar, RoleGuard
     │   ├── ui/             Nút, bảng, modal, badge...
@@ -145,28 +143,26 @@ equiflow-web/
 |---|---|---|
 | `package.json` | Tên dự án, danh sách thư viện (`dependencies`) và các lệnh `npm run ...` | Chỉ khi thêm thư viện, mà việc này phải hỏi nhóm trước |
 | `package-lock.json` | Ghi chính xác phiên bản từng thư viện để mọi máy cài giống nhau | Không sửa tay, npm tự cập nhật |
-| `index.html` | Trang HTML duy nhất của ứng dụng. Có thẻ `<div id="root">` để React gắn giao diện vào, và nạp `src/main.tsx`. Đây cũng là nơi đặt `<title>` và favicon | Ít khi (chỉ đổi tiêu đề tab, favicon) |
-| `vite.config.ts` | Cấu hình Vite: bật plugin React. Sau này nếu cần proxy gọi API hoặc alias đường dẫn thì thêm ở đây | Hiếm |
-| `tsconfig.json` | File TypeScript "điều phối", trỏ tới hai file bên dưới | Không |
-| `tsconfig.app.json` | Luật TypeScript cho code trong `src/` (chế độ strict, JSX...) | Không |
-| `tsconfig.node.json` | Luật TypeScript cho các file chạy bằng Node như `vite.config.ts` | Không |
+| `tsconfig.json` | Luật TypeScript cho cả dự án (chế độ `strict`, JSX) và **alias `@/*` → `src/*`**. Next.js có thể tự chỉnh nhẹ file này khi build | Không |
+| `next-env.d.ts` | Next.js tự sinh để TypeScript hiểu kiểu của Next. **Không sửa, không commit** | Không |
 | `.oxlintrc.json` | Cấu hình Oxlint (bắt lỗi dùng sai React hooks, cảnh báo export component) | Hiếm |
-| `.gitignore` | Những gì Git **không** theo dõi: `node_modules`, `dist`, `*.local` (gồm `.env.local`), file của editor | Hiếm |
+| `.gitignore` | Những gì Git **không** theo dõi: `node_modules`, `.next`, `next-env.d.ts`, `*.local` (gồm `.env.local`), file của editor | Hiếm |
 | `.env.example` | **Mẫu** biến môi trường, được commit để người mới biết cần khai báo gì | Khi thêm biến mới |
 | `.env.local` | Biến môi trường **thật** của máy bạn. **Không commit**. Tạo bằng cách copy từ `.env.example` | Tùy máy |
 | `CLAUDE.md` | Quy tắc dự án cho Claude Code (công cụ AI): cấu trúc, quy tắc, cách làm việc. Người trong nhóm cũng nên đọc | Khi nhóm đổi quy ước |
 | `README.md` | Tài liệu bạn đang đọc | Khi cấu trúc thay đổi |
+| `HUONG_DAN_HOC.md` | Hướng dẫn học: tài khoản demo, giải thích code, kiến thức cần học, câu hỏi vấn đáp | Khi thêm tính năng lớn |
 
 ---
 
 ## 5. `public/` — file tĩnh
 
-Mọi thứ trong `public/` được phục vụ **nguyên xi** ở đường dẫn gốc (ví dụ `public/fonts/x.woff2` truy cập bằng `/fonts/x.woff2`). Vite không xử lý hay đổi tên chúng.
+Mọi thứ trong `public/` được phục vụ **nguyên xi** ở đường dẫn gốc (ví dụ `public/fonts/x.woff2` truy cập bằng `/fonts/x.woff2`). Next.js không xử lý hay đổi tên chúng.
 
 | Đường dẫn | Chức năng |
 |---|---|
-| `public/favicon.svg` | Biểu tượng hiện trên tab trình duyệt (hiện là của template Vite, nên thay bằng logo EquiFlow) |
-| `public/icons.svg` | Bộ biểu tượng SVG mẫu của template |
+| `public/images/logo-fivegates.svg` | Logo **Five Gates** của EquiFlow. Cũng là biểu tượng trên tab trình duyệt (khai báo trong `src/app/layout.tsx`) |
+| `public/images/equine-editorial.webp` | Ảnh ngựa ở cột phải trang đăng nhập/đăng ký (lấy từ gói thiết kế) |
 | `public/fonts/` | **Font chữ** của hệ thống, copy từ prototype cũ |
 | `public/fonts/equi-font-0.woff2` … `equi-font-7.woff2` | 8 file font dạng woff2 (định dạng nén cho web). File `src/styles/fonts.css` sẽ khai báo `@font-face` trỏ tới các file này |
 | `public/fonts/DM-Sans-OFL.txt`, `Manrope-OFL.txt` | Giấy phép **SIL OFL** của hai họ font DM Sans và Manrope. **Giữ lại**, vì giấy phép yêu cầu kèm theo khi phân phối font |
@@ -175,24 +171,39 @@ Mọi thứ trong `public/` được phục vụ **nguyên xi** ở đường d�
 
 ## 6. `src/` — mã nguồn
 
-### 6.1 Các file lõi (đang có từ template Vite)
+### 6.1 Các file lõi
 
 | File | Chức năng |
 |---|---|
-| `src/main.tsx` | **Điểm vào** của ứng dụng: nạp CSS toàn cục và render `<App />` vào `<div id="root">` |
-| `src/App.tsx`, `App.css`, `index.css` | Trang demo mẫu của Vite. **Sẽ bị thay thế**: `App.tsx` thật nằm ở `src/app/App.tsx`, CSS toàn cục nằm trong `src/styles/` |
-| `src/assets/` | Ảnh/SVG mẫu của Vite (`hero.png`, `react.svg`, `vite.svg`). Dùng cho ảnh cần Vite xử lý (import trong code). Có thể xóa khi bỏ trang demo |
+| `src/app/layout.tsx` | **Root layout**: khung `<html>`/`<body>` bọc **mọi trang**. Nạp 3 file CSS toàn cục (`tokens.css`, `fonts.css`, `global.css`) và khai báo `metadata` (tiêu đề tab, favicon) |
+| `src/app/page.tsx` | Trang của đường dẫn `/`. Hiện là trang tạm, sẽ chuyển hướng sang `/login` |
 
-### 6.2 `src/app/`
+Next.js không có file "điểm khởi động" kiểu `main.tsx`; nó tự dựng ứng dụng từ thư mục `src/app/`.
 
-**Vỏ ứng dụng**, nơi ráp mọi thứ lại với nhau.
+### 6.2 `src/app/` — routing của Next.js
 
-| File (sẽ tạo) | Chức năng |
+**Thư mục = đường dẫn URL.** Trong Next.js (App Router), một thư mục chứa file `page.tsx` sẽ trở thành một trang:
+
+| File | URL |
 |---|---|
-| `App.tsx` | Component gốc: bọc router, trạng thái đăng nhập, Toast toàn cục |
-| `router.tsx` | **Nơi duy nhất khai báo mọi route** (đường dẫn URL → trang). Mỗi route được bọc `RoleGuard` để chặn người không đủ quyền |
+| `src/app/page.tsx` | `/` |
+| `src/app/(auth)/login/page.tsx` | `/login` |
+| `src/app/(app)/accounts/page.tsx` | `/accounts` |
+| `src/app/(app)/accounts/[id]/page.tsx` | `/accounts/nam` (`[id]` là tham số động) |
 
-> Quy tắc: muốn thêm trang mới thì khai báo route **ở `router.tsx`**, không rải ở chỗ khác.
+Vài điều cần biết:
+- **Thư mục có ngoặc** như `(auth)`, `(app)` là **nhóm route**: chỉ để gom file và dùng chung `layout.tsx`, **không** xuất hiện trong URL.
+- **`layout.tsx`** bọc các trang bên trong nó. Ví dụ `(app)/layout.tsx` sẽ chứa `AppShell` (Sidebar + Topbar) cho mọi trang sau đăng nhập.
+- **`page.tsx` trong `app/` phải mỏng.** Trang thật nằm ở `features/<nghiệp vụ>/pages/`, còn `page.tsx` chỉ re-export:
+
+```tsx
+// src/app/(auth)/login/page.tsx
+export { default } from "@/features/auth/pages/LoginPage";
+```
+
+- Route cần quyền được bọc bằng `RoleGuard` (xem [mục 7](#7-vai-trò-trạng-thái-tài-khoản-và-phân-quyền)).
+
+> Quy tắc: muốn thêm trang mới thì tạo thư mục + `page.tsx` **trong `src/app/`**, và viết trang thật trong `features/`.
 
 ### 6.3 `src/components/` — thành phần dùng chung
 
@@ -233,11 +244,11 @@ Các thành phần dùng ở **nhiều feature**. Viết trước, feature dùng
 
 ### 6.4 `src/lib/` — logic dùng chung
 
-Các file **không có giao diện**, chỉ chứa logic. Hiện tại cả 5 file đều **đang rỗng**.
+Các file **không có giao diện**, chỉ chứa logic. Cả 5 file đã được viết (kèm `session.ts`, `hooks.ts`, `format.ts`, `password.ts`, `navigation.ts`, `cx.ts` là các hàm phụ dùng chung).
 
 | File | Chức năng |
 |---|---|
-| `api.ts` | **Cổng duy nhất để gọi backend.** Bọc `fetch`: tự gắn cookie phiên, đọc `VITE_API_URL`; khi `VITE_USE_MOCK=true` thì chuyển sang `src/mock/`. Xử lý lỗi chung: **401 → mở SessionExpired**, **403 → chuyển tới trang Forbidden403**. Trang và component **không được gọi `fetch` trực tiếp** |
+| `api.ts` | **Cổng duy nhất để gọi backend.** Bọc `fetch`: tự gắn cookie phiên, đọc `NEXT_PUBLIC_API_URL`; khi `NEXT_PUBLIC_USE_MOCK=true` thì chuyển sang `src/mock/`. Xử lý lỗi chung: **401 → mở SessionExpired**, **403 → chuyển tới trang Forbidden403**. Trang và component **không được gọi `fetch` trực tiếp** |
 | `auth.ts` | Trạng thái phiên đăng nhập: `currentUser` (ai đang đăng nhập, vai trò gì), hàm `login`/`logout`, kiểm tra còn phiên hay không |
 | `permissions.ts` | **Bảng "vai trò → được làm gì".** Đây là **nguồn sự thật duy nhất** về phân quyền. `Sidebar` và `RoleGuard` đều đọc từ đây, nên muốn đổi quyền chỉ sửa một chỗ |
 | `status.ts` | Chuyển **mã trạng thái** (enum như `PENDING_EMAIL`) thành **nhãn tiếng Anh** và **class màu badge**. Mọi `StatusBadge` đều dựa vào đây |
@@ -245,7 +256,7 @@ Các file **không có giao diện**, chỉ chứa logic. Hiện tại cả 5 fi
 
 ### 6.5 `src/mock/` — dữ liệu giả
 
-Dữ liệu và handler giả lập API để **chạy giao diện khi chưa có backend**. Tệp sẽ được chia theo nghiệp vụ (accounts, horses, training...). Được `lib/api.ts` gọi khi `VITE_USE_MOCK=true`.
+Dữ liệu và handler giả lập API để **chạy giao diện khi chưa có backend**. Tệp sẽ được chia theo nghiệp vụ (accounts, horses, training...). Được `lib/api.ts` gọi khi `NEXT_PUBLIC_USE_MOCK=true`.
 
 Yêu cầu bắt buộc cho mock:
 - Có **ít nhất 1 tài khoản cho mỗi vai trò** (5 vai trò).
@@ -272,7 +283,7 @@ Các `interface`/`type` TypeScript dùng ở **nhiều feature** (ví dụ `User
 
 ```
 features/<tên>/
-├── pages/        Các TRANG (mỗi trang ứng với một route trong router.tsx)
+├── pages/        Các TRANG (mỗi trang được một `page.tsx` trong `src/app/` re-export)
 ├── components/   Thành phần CHỈ dùng trong feature này
 ├── api.ts        Hàm gọi API của feature (dùng lib/api.ts bên dưới)
 └── types.ts      Kiểu dữ liệu CHỈ của feature này
@@ -292,9 +303,9 @@ Danh sách trang dưới đây lấy từ `CLAUDE.md`. Mô tả là **chức nă
 | `Landing` | Trang giới thiệu CLB, cổng vào cho khách |
 | `Login` | Đăng nhập |
 | `SignUp` | Đăng ký. **Chỉ dành cho Horse Owner** |
-| `VerifyEmail` | Xác nhận email sau khi đăng ký (tài khoản đang `PENDING_EMAIL`) |
-| `ForgotPassword` | Yêu cầu đặt lại mật khẩu. **Luôn trả thông báo trung tính** (không tiết lộ email có tồn tại hay không) |
-| `ResetPassword` | Đặt mật khẩu mới từ link trong email |
+| `VerifyEmail` | Nhập **mã OTP** gửi về email để xác minh email sau khi đăng ký |
+| `ForgotPassword` | Bước 1 quên mật khẩu: nhập email để nhận **mã OTP**. **Luôn trả thông báo trung tính** (không tiết lộ email có tồn tại hay không) |
+| `ResetPassword` | Bước 2–3 quên mật khẩu: nhập **mã OTP** đã nhận, rồi đặt mật khẩu mới |
 | `AcceptInvite` | Nhân viên nhận lời mời từ Club Manager: đặt mật khẩu, kích hoạt tài khoản (`INVITED` → `ACTIVE`) |
 | `MyProfile` | Xem/sửa hồ sơ cá nhân, đổi mật khẩu |
 | `Forbidden403` | Trang "không có quyền truy cập". Bị chuyển tới từ `RoleGuard` hoặc khi API trả 403 |
@@ -408,6 +419,7 @@ Quy trình hằng ngày (routine), khẩu phần ăn (rations), công việc (ta
 - **Sign Up chỉ dành cho Horse Owner.** Nhân viên được **Club Manager mời qua email**.
 - Owner chỉ `ACTIVE` khi đã gắn **≥ 1 ngựa** (qua màn Horse Intake).
 - **Forgot Password luôn trả thông báo trung tính.**
+- **Xác minh email luôn bằng mã OTP gửi về email, không dùng link.** Quên mật khẩu = nhập email → nhập OTP → đặt mật khẩu mới.
 - **Horse Owner chỉ thấy ngựa của mình.** Truy cập ngựa của người khác → `Forbidden403`.
 
 ### Cách phân quyền hoạt động (3 lớp, đều đọc từ `lib/permissions.ts`)
@@ -429,11 +441,11 @@ features/*/api.ts        ví dụ: listHorses()
    ▼
 lib/api.ts               gắn cookie, xử lý 401/403 chung
    │
-   ├── VITE_USE_MOCK=true  ──►  src/mock/    (dữ liệu giả)
-   └── VITE_USE_MOCK=false ──►  Backend REST (VITE_API_URL)
+   ├── NEXT_PUBLIC_USE_MOCK=true  ──►  src/mock/    (dữ liệu giả)
+   └── NEXT_PUBLIC_USE_MOCK=false ──►  Backend REST (NEXT_PUBLIC_API_URL)
 ```
 
-Nhờ vậy khi backend xong, chỉ cần đổi `VITE_USE_MOCK=false`, **không phải sửa trang**.
+Nhờ vậy khi backend xong, chỉ cần đổi `NEXT_PUBLIC_USE_MOCK=false`, **không phải sửa trang**.
 
 Khi API trả lỗi, `lib/messages.ts` đổi mã lỗi thành câu tiếng Anh dễ hiểu để hiển thị.
 
@@ -476,7 +488,7 @@ Cách làm việc:
 
 - `main`: nhánh ổn định. Không làm việc trực tiếp trên đây.
 - Mỗi người làm trên nhánh riêng theo phạm vi, ví dụ `fe1/auth`, `fe2/training`. Xong thì tạo Pull Request vào `main`.
-- **Không commit:** `node_modules/`, `dist/`, `.env.local`. Các file này đã được `.gitignore` chặn, nhưng vẫn nên kiểm tra bằng `git status` trước khi commit.
+- **Không commit:** `node_modules/`, `.next/`, `.env.local`. Các file này đã được `.gitignore` chặn, nhưng vẫn nên kiểm tra bằng `git status` trước khi commit.
 - Commit message ngắn gọn, nói rõ đã làm gì (tiếng Việt hoặc tiếng Anh).
 
 ---
@@ -485,7 +497,7 @@ Cách làm việc:
 
 | Tôi muốn... | Sửa/tạo ở |
 |---|---|
-| Thêm một trang mới | Tạo file trong `features/<nghiệp vụ>/pages/`, rồi khai báo route trong `app/router.tsx` |
+| Thêm một trang mới | Viết trang trong `features/<nghiệp vụ>/pages/`, rồi tạo thư mục + `page.tsx` tương ứng trong `src/app/` (chỉ re-export) |
 | Thêm mục vào menu bên trái | `lib/permissions.ts` (Sidebar sẽ tự đọc) |
 | Đổi vai trò nào vào được trang nào | `lib/permissions.ts` |
 | Thêm nút/bảng/modal dùng ở nhiều nơi | `components/ui/` |
