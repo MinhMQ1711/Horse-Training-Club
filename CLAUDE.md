@@ -42,6 +42,8 @@ src/
     stable/       P6  (optional) Groom: routine, rations, tasks, incidents, supplies
     racing/       P7  (optional) RaceEntry, RaceResults
     Mỗi feature gồm: pages/  components/  api.ts  types.ts
+    CHỈ tạo thư mục feature khi bắt đầu phase của nó (hiện có auth, accounts, dashboard).
+    KHÔNG tạo sẵn thư mục rỗng, file rỗng hay .gitkeep.
   shared/         DÙNG CHUNG cho mọi feature — viết trước, feature dùng lại
     components/
       layout/     AppShell, Sidebar, Topbar, RoleGuard
