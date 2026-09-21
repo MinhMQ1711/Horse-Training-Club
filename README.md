@@ -161,34 +161,44 @@ Set in `.env.local` (never committed). Restart `npm run dev` after changing it.
 
 ## Project structure
 
+### Repository map
+
+Everything at the top level of the repository, and what it is for:
+
+| Path | What it is |
+|---|---|
+| `src/` | **All application code.** Almost all work happens here |
+| `public/` | Files served exactly as they are: fonts, logo, photo, `robots.txt` |
+| `docs/` | Documentation: architecture diagrams, API contract, guides, screenshots |
+| `.github/` | GitHub setup: CI workflow (lint + build), pull request and issue templates |
+| `package.json` | Project name, version, scripts (`npm run ...`) and the list of libraries |
+| `package-lock.json` | Exact library versions, so every machine installs the same thing. Never edit by hand |
+| `tsconfig.json` | TypeScript rules and the `@/` shortcut that points to `src/` |
+| `.oxlintrc.json` | Lint rules (catches common React mistakes) |
+| `.gitignore` | Files Git must not track: `node_modules`, `.next`, `.env.local` |
+| `.env.example` | Template for `.env.local`: mock switch and backend address |
+| `CLAUDE.md` | Working rules for the AI coding assistant the team uses |
+| `CONTRIBUTING.md` | Branches, commit messages, pull request checklist |
+| `README.md` | This page |
+
+### Inside `src/`
+
 ```text
-Horse-Training-Club/
-├── .github/                  CI workflow, pull request and issue templates
-├── docs/                     Architecture, API contract, guides, images
-├── public/                   Static files: fonts, logo, images
-├── src/
-│   ├── app/                  Routes (Next.js App Router). Each page.tsx is thin
-│   ├── features/             One folder per business flow
-│   │   ├── auth/             Login, sign up, OTP, forgot password, profile      (P1)
-│   │   ├── accounts/         Account list, permissions                           (P1)
-│   │   ├── horses/           Horse profiles                                      (P2)
-│   │   ├── intake/           Bringing a horse into the club                      (P2)
-│   │   ├── master-data/      Staff, supplies, stalls                             (P2)
-│   │   ├── training/         Plans, calendar, live monitor, alerts               (P3)
-│   │   ├── health/           Health, treatments, Training Lock                   (P4)
-│   │   ├── dashboard/        Dashboards, reports, audit log                      (P5)
-│   │   ├── stable/           Daily stable care, optional                         (P6)
-│   │   └── racing/           Race entries and results, optional                  (P7)
-│   └── shared/               Used by every feature
-│       ├── components/       ui/  form/  layout/
-│       ├── lib/              api, auth, permissions, status, messages
-│       ├── mock/             Fake data and fake API
-│       ├── styles/           Design tokens, fonts, global CSS
-│       └── types/            Shared TypeScript types
-├── CLAUDE.md                 Rules for the AI coding assistant used by the team
-├── CONTRIBUTING.md           How to contribute
-└── package.json
+src/
+├── app/                  Routes (Next.js App Router). Each page.tsx is thin
+├── features/             One folder per business flow, created when its phase starts
+│   ├── auth/             Login, sign up, OTP, forgot password, profile      (P1, done)
+│   ├── accounts/         Account list, permissions                          (P1, done)
+│   └── dashboard/        Dashboard shell                                    (P5, started)
+└── shared/               Used by every feature
+    ├── components/       ui/  form/  layout/
+    ├── lib/              api, auth, permissions, status, messages
+    ├── mock/             Fake data and fake API
+    ├── styles/           Design tokens, fonts, global CSS
+    └── types/            Shared TypeScript types
 ```
+
+Feature folders that will appear as their phase starts: `horses`, `intake`, `master-data` (P2), `training` (P3), `health` (P4), `stable` (P6), `racing` (P7).
 
 Each feature has the same shape: `pages/`, `components/`, `api.ts`, `types.ts`. Rules:
 
@@ -206,6 +216,17 @@ Each feature has the same shape: `pages/`, `components/`, `api.ts`, `types.ts`. 
 | [docs/PROJECT_GUIDE.md](docs/PROJECT_GUIDE.md) | Vietnamese | What every folder and file does, and "where do I change X?" |
 | [docs/HUONG_DAN_HOC.md](docs/HUONG_DAN_HOC.md) | Vietnamese | Study guide with sample questions for the course defence |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | English | Branches, commits, pull requests |
+
+## Course scope (SWP391)
+
+The course requires four workflows. This is where each one lives in the repository:
+
+| Course requirement | Phase | Where in the code |
+|---|---|---|
+| **Workflow 0** - register, log in, log out, forgot password | P1 | `features/auth`, `features/accounts` |
+| **Workflow 1** - basic CRUD of master data | P2 | `features/horses`, `features/master-data` *(planned)* |
+| **Workflow 2** - core transaction: main flow plus at least two exception paths | P3 + P4 | `features/training`, `features/health` *(planned)*. Exception paths: threshold alert, and the Training Lock a Veterinarian places on an injured horse |
+| **Workflow 3** - dashboard and reporting | P5 | `features/dashboard` |
 
 ## Roadmap
 
