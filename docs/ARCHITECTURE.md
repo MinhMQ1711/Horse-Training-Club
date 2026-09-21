@@ -71,7 +71,7 @@ flowchart TB
 | Something two features both need moves into `shared/` | One copy, one place to fix |
 | Pages talk to `features/*/api.ts`, never to `fetch` | The mock/real switch stays in a single file |
 
-Feature folders and who owns them. A folder is created only when its phase starts; today just `auth`, `accounts` and `dashboard` exist.
+Feature folders and who owns them. All folders exist as an empty skeleton; a file gets its code only when that screen is requested.
 
 ```mermaid
 flowchart LR
@@ -220,7 +220,7 @@ sequenceDiagram
 
 ## 5. Account lifecycle
 
-An account is always in exactly one status. Solid arrows exist in the code today; the dashed ones are planned.
+An account is always in exactly one status. Arrows marked `(planned)` were not part of the first demo version (git tag `v0.1.0-priority1`).
 
 ```mermaid
 stateDiagram-v2
@@ -312,7 +312,7 @@ Work follows the priority order below. `P1` to `P5` are required by the course, 
 
 ```mermaid
 flowchart LR
-  P1["P1<br/>Auth and RBAC"]:::done
+  P1["P1<br/>Auth and RBAC"]:::todo
   P2["P2<br/>Horses, Intake,<br/>Master data"]:::todo
   P3["P3<br/>Training plans<br/>+ 2 exception paths"]:::todo
   P4["P4<br/>Health and injuries"]:::todo
@@ -331,7 +331,7 @@ flowchart LR
 
 | Phase | Scope | Owner | Status |
 |---|---|---|---|
-| P1 | Sign up, OTP, forgot password, app shell, RBAC, accounts, permissions, 403, session expired, profile | FE1 | Done (16 routes) |
+| P1 | Sign up, OTP, forgot password, app shell, RBAC, accounts, permissions, 403, session expired, profile | FE1 | Skeleton only. A working demo is kept at git tag `v0.1.0-priority1` |
 | P2 | Horse profiles, intake, staff / supplies / stall master data | FE1 | Not started |
 | P3 | Training plans, calendar, live monitor, threshold alerts | FE2 | Not started |
 | P4 | Herd health, medical records, injury map, **Training Lock** | FE2 | Not started |

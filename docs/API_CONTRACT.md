@@ -1,6 +1,6 @@
 # API contract
 
-What the web app expects from the backend. It is written from the mock API in [`src/shared/mock/handlers.ts`](../src/shared/mock/handlers.ts), which behaves exactly as the real backend must. When both sides agree on this file, switching `VITE_USE_MOCK` to `false` needs no change in any page.
+What the web app expects from the backend. It was written from the mock API of the first demo version (git tag `v0.1.0-priority1`, file `src/shared/mock/handlers.ts`), which behaves exactly as the real backend must. When both sides agree on this file, switching `VITE_USE_MOCK` to `false` needs no change in any page.
 
 > **Status:** covers Priority 1 (auth, accounts, profile). Endpoints for horses, training, health and dashboards will be added as each phase is built.
 
@@ -130,7 +130,7 @@ interface PublicAccount {            // never contains a password
 }
 ```
 
-The source of truth for these types is [`src/shared/types/auth.ts`](../src/shared/types/auth.ts).
+The source of truth for these types is `src/shared/types/auth.ts` (git tag `v0.1.0-priority1`).
 
 ## Audit log
 
