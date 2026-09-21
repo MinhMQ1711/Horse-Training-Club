@@ -19,6 +19,6 @@ labels: bug
 - Logged in as (email / role):
 - Screen or URL:
 - Browser:
-- Mock mode (`NEXT_PUBLIC_USE_MOCK`): true / false
+- Mock mode (`VITE_USE_MOCK`): true / false
 
 <!-- Add a screenshot if it helps. -->
