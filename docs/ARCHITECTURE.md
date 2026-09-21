@@ -30,7 +30,7 @@ flowchart LR
   end
 
   subgraph FE["This repository - EquiFlow web app"]
-    NEXT["Next.js 16 - App Router<br/>React 19 + TypeScript<br/>CSS Modules"]
+    NEXT["React 19 + TypeScript<br/>Vite + React Router - single-page app<br/>CSS Modules"]
     MOCK["Mock API<br/>data kept in localStorage"]
   end
 
@@ -40,8 +40,8 @@ flowchart LR
   end
 
   USERS -->|"HTTPS, browser"| NEXT
-  NEXT -->|"NEXT_PUBLIC_USE_MOCK = true"| MOCK
-  NEXT -->|"NEXT_PUBLIC_USE_MOCK = false<br/>JSON + session cookie"| API
+  NEXT -->|"VITE_USE_MOCK = true"| MOCK
+  NEXT -->|"VITE_USE_MOCK = false<br/>JSON + session cookie"| API
   API --> DB
 ```
 
@@ -55,7 +55,7 @@ Source code is split into three top-level folders. Imports may only go **downwar
 
 ```mermaid
 flowchart TB
-  APP["<b>src/app</b><br/>Routing. Each page.tsx is thin<br/>and re-exports a page from features"]
+  APP["<b>src/app</b><br/>Route table (router.tsx)<br/>maps each URL to a page from features"]
   FEAT["<b>src/features/*</b><br/>One folder per business flow<br/>pages · components · api.ts · types.ts"]
   SHARED["<b>src/shared</b><br/>components (ui, form, layout) · lib · mock · types · styles"]
 
@@ -128,10 +128,10 @@ sequenceDiagram
   P->>F: listAccounts()
   F->>A: api("GET", "/accounts")
 
-  alt NEXT_PUBLIC_USE_MOCK = true
+  alt VITE_USE_MOCK = true
     A->>M: handleMock(method, path, body)
     M-->>A: JSON, or ApiError(status, code)
-  else NEXT_PUBLIC_USE_MOCK = false
+  else VITE_USE_MOCK = false
     A->>B: fetch(API_URL + path, credentials: include)
     B-->>A: JSON, or { code, message, data }
   end
