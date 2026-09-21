@@ -3,9 +3,9 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AuthLayout, HERO_TEAM } from "@/components/layout/AuthLayout";
-import { formatDateTime } from "@/lib/format";
-import { useQueryParams } from "@/lib/hooks";
+import { AuthLayout, HERO_TEAM } from "@/shared/components/layout/AuthLayout";
+import { formatDateTime } from "@/shared/lib/format";
+import { useQueryParams } from "@/shared/lib/hooks";
 import { verifyEmail } from "../api";
 import { signupFlow } from "../flow";
 import { OtpVerifyForm } from "../components/OtpVerifyForm";

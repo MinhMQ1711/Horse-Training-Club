@@ -9,7 +9,7 @@ Hệ thống quản lý CLB đua ngựa (đồ án SWP391). File này Claude Cod
 - Import bằng alias `@/` (trỏ tới `src/`).
 - Style: CSS thuần + CSS Modules (`*.module.css`). KHÔNG Tailwind, KHÔNG UI kit ngoài.
 - Không thêm thư viện mới nếu chưa hỏi ý kiến.
-- Backend (làm riêng) là REST API theo MVC. FE gọi qua `src/lib/api.ts`, xác thực bằng session cookie.
+- Backend (làm riêng) là REST API theo MVC. FE gọi qua `src/shared/lib/api.ts`, xác thực bằng session cookie.
 - Chưa có API thì chạy bằng mock: `NEXT_PUBLIC_USE_MOCK=true` trong `.env.local` (biến phải có tiền tố `NEXT_PUBLIC_` mới đọc được ở trình duyệt).
 
 ## Ngôn ngữ
@@ -18,7 +18,7 @@ Hệ thống quản lý CLB đua ngựa (đồ án SWP391). File này Claude Cod
 
 ## Nguồn thiết kế (thứ tự ưu tiên)
 1. Gói handoff từ Claude Design (dự án EquiFlow) — là bản CHUẨN về giao diện.
-2. EquiFlow Design System — nguồn của `src/styles/tokens.css`.
+2. EquiFlow Design System — nguồn của `src/shared/styles/tokens.css`.
 3. Prototype cũ, CHỈ ĐỌC để tham khảo nội dung: `D:\Tailieu_AI\NewHorse\NewHorse`
    (không sửa, không đọc thư mục NewHorseWebBackup).
 
@@ -42,26 +42,30 @@ src/
     stable/       P6  (optional) Groom: routine, rations, tasks, incidents, supplies
     racing/       P7  (optional) RaceEntry, RaceResults
     Mỗi feature gồm: pages/  components/  api.ts  types.ts
-  components/     Dùng chung — viết trước, feature dùng lại
-    layout/       AppShell, Sidebar, Topbar, RoleGuard
-    ui/           Button, StatusBadge, DataTable, Modal, ConfirmModal, Toast,
+  shared/         DÙNG CHUNG cho mọi feature — viết trước, feature dùng lại
+    components/
+      layout/     AppShell, Sidebar, Topbar, RoleGuard
+      ui/         Button, StatusBadge, DataTable, Modal, ConfirmModal, Toast,
                   EmptyState, LockBanner, DisabledHint (nút disable + tooltip lý do)
-    form/         Field, Select, DatePicker, FileUpload, PasswordStrength
-  lib/
-    api.ts        Gói fetch: gắn cookie, chuyển sang mock khi NEXT_PUBLIC_USE_MOCK=true,
+      form/       Field, Select, DatePicker, FileUpload, PasswordStrength
+    lib/
+      api.ts      Gói fetch: gắn cookie, chuyển sang mock khi NEXT_PUBLIC_USE_MOCK=true,
                   401 → mở SessionExpired, 403 → trang Forbidden403
-    auth.ts       currentUser, login/logout, trạng thái phiên
-    permissions.ts  Bảng vai trò → chức năng. Sidebar và RoleGuard đều đọc từ đây
-    status.ts     Enum trạng thái → nhãn + class màu badge
-    messages.ts   Mã lỗi từ API → câu thông báo tiếng Anh dễ hiểu
-  mock/           Dữ liệu giả + handler giả lập API (accounts, horses, training...)
-  types/          Kiểu dữ liệu dùng chung, khớp tên bảng DB
-  styles/         tokens.css (biến màu/chữ/khoảng cách), fonts.css, global.css
+      auth.ts     currentUser, login/logout, trạng thái phiên
+      permissions.ts  Bảng vai trò → chức năng. Sidebar và RoleGuard đều đọc từ đây
+      status.ts   Enum trạng thái → nhãn + class màu badge
+      messages.ts Mã lỗi từ API → câu thông báo tiếng Anh dễ hiểu
+    mock/         Dữ liệu giả + handler giả lập API (accounts, horses, training...)
+    types/        Kiểu dữ liệu dùng chung, khớp tên bảng DB
+    styles/       tokens.css (biến màu/chữ/khoảng cách), fonts.css, global.css
+  Quy tắc phụ thuộc: app → features → shared. features KHÔNG import lẫn nhau.
+  Tài liệu: README.md (tổng quan), docs/ARCHITECTURE.md (sơ đồ), docs/API_CONTRACT.md,
+  docs/PROJECT_GUIDE.md (giải thích từng thư mục), docs/HUONG_DAN_HOC.md (học + vấn đáp).
 
 ## Quy tắc bắt buộc
 1. Màu, cỡ chữ, bo góc, bóng: chỉ dùng biến trong tokens.css. Không hardcode hex.
-2. Thành phần đã có trong components/ thì dùng lại, không viết bản mới trong feature.
-3. Quyền truy cập: KHÔNG kiểm tra vai trò rải rác trong trang. Dùng permissions.ts
+2. Thành phần đã có trong shared/components/ thì dùng lại, không viết bản mới trong feature.
+3. Quyền truy cập: KHÔNG kiểm tra vai trò rải rác trong trang. Dùng shared/lib/permissions.ts
    + RoleGuard (chặn route) + DisabledHint (nút bị chặn: disable + giải thích, không ẩn).
 4. Horse Owner chỉ thấy ngựa của mình; truy cập ngựa khác → Forbidden403.
 5. Mỗi trang có đủ: loading · empty state · lỗi · trạng thái bị chặn quyền.

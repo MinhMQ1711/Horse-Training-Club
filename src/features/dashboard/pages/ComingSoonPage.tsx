@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/components/layout/AuthProvider";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { capitalize } from "@/lib/format";
-import { ROLE_NAV, ROLE_WORKSPACE } from "@/lib/permissions";
+import { useCurrentUser } from "@/shared/components/layout/AuthProvider";
+import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { Button } from "@/shared/components/ui/Button";
+import { Card } from "@/shared/components/ui/Card";
+import { EmptyState } from "@/shared/components/ui/EmptyState";
+import { capitalize } from "@/shared/lib/format";
+import { ROLE_NAV, ROLE_WORKSPACE } from "@/shared/lib/permissions";
 
 // Chỗ giữ cho các màn hình của Priority 2–7 (ngựa, huấn luyện, y tế...). Menu đã trỏ tới đây;
 // khi làm xong màn nào thì tạo route riêng trong src/app/(app)/ để thay thế.

@@ -1,5 +1,5 @@
-import { api } from "@/lib/api";
-import type { AuthUser, NotifyKey } from "@/types/auth";
+import { api } from "@/shared/lib/api";
+import type { AuthUser, NotifyKey } from "@/shared/types/auth";
 import type { ForbiddenInfo, OtpPurpose, OtpTimes, RegisterInput, RegistrationResult, ResetVerifyResult } from "./types";
 
 // ---- đăng ký + xác minh email (OTP) ----

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth } from "@/components/layout/AuthProvider";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Card } from "@/components/ui/Card";
+import { useAuth } from "@/shared/components/layout/AuthProvider";
+import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { Card } from "@/shared/components/ui/Card";
 
 // Trang xem thử Session Expired (design 1.14): mở hộp thoại ngay khi vào.
 // Trong thực tế hộp thoại này xuất hiện sau 30 phút không thao tác, khi API trả 401,
