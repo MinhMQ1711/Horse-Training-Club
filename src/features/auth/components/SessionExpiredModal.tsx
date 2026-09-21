@@ -3,12 +3,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Field } from "@/components/form/Field";
-import { Input } from "@/components/form/Input";
-import { useAuth } from "@/components/layout/AuthProvider";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { loginFailure, messageFor } from "@/lib/messages";
+import { Field } from "@/shared/components/form/Field";
+import { Input } from "@/shared/components/form/Input";
+import { useAuth } from "@/shared/components/layout/AuthProvider";
+import { Button } from "@/shared/components/ui/Button";
+import { Modal } from "@/shared/components/ui/Modal";
+import { loginFailure, messageFor } from "@/shared/lib/messages";
 
 // Design 1.14: hộp thoại KHÔNG có nút đóng — bắt buộc chọn "đăng nhập lại" hoặc "rời đi".
 export function SessionExpiredModal() {

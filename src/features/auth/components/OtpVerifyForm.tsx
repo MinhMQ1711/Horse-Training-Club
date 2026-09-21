@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { Field } from "@/components/form/Field";
-import { OtpInput } from "@/components/form/OtpInput";
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { useToast } from "@/components/ui/Toast";
-import { ApiError } from "@/lib/api";
-import { formatCountdown, formatDateTime } from "@/lib/format";
-import { useCountdown } from "@/lib/hooks";
-import { otpMessage } from "@/lib/messages";
+import { Field } from "@/shared/components/form/Field";
+import { OtpInput } from "@/shared/components/form/OtpInput";
+import { Alert } from "@/shared/components/ui/Alert";
+import { Button } from "@/shared/components/ui/Button";
+import { useToast } from "@/shared/components/ui/Toast";
+import { ApiError } from "@/shared/lib/api";
+import { formatCountdown, formatDateTime } from "@/shared/lib/format";
+import { useCountdown } from "@/shared/lib/hooks";
+import { otpMessage } from "@/shared/lib/messages";
 import { otpStatus, resendOtp } from "../api";
 import type { OtpPurpose, OtpTimes } from "../types";
 import styles from "./OtpVerifyForm.module.css";

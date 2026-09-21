@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Providers } from "@/components/layout/Providers";
-import "@/styles/tokens.css";
-import "@/styles/fonts.css";
-import "@/styles/global.css";
+import { Providers } from "@/shared/components/layout/Providers";
+import "@/shared/styles/tokens.css";
+import "@/shared/styles/fonts.css";
+import "@/shared/styles/global.css";
 
 // Next.js đọc `metadata` để tự tạo thẻ <title>, <meta>, favicon trong <head>.
 export const metadata: Metadata = {
