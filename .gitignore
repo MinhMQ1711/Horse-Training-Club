@@ -1,29 +1,23 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Dependencies
 node_modules
-dist
-dist-ssr
+
+# Next.js build output
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+
+# Environment files with real values. Only .env.example is committed.
+.env*.local
 *.local
 
-# Editor directories and files
+# Logs
+*.log
+npm-debug.log*
+
+# Editors and OS
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Next.js
-.next
-next-env.d.ts
-*.tsbuildinfo
+Thumbs.db
