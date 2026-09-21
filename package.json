@@ -1,8 +1,29 @@
 {
   "name": "equiflow-web",
+  "version": "0.1.0",
+  "description": "Front end for a racing-horse club management system: horse profiles, training plans, health care and role-based access. SWP391 course project.",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "rbac",
+    "horse-racing",
+    "club-management",
+    "swp391"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MinhMQ1711/Horse-Training-Club.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MinhMQ1711/Horse-Training-Club/issues"
+  },
+  "homepage": "https://github.com/MinhMQ1711/Horse-Training-Club#readme",
+  "engines": {
+    "node": ">=20.9"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
