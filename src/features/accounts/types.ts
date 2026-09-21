@@ -1,4 +1,4 @@
-import type { PublicAccount } from "@/types/auth";
+import type { PublicAccount } from "@/shared/types/auth";
 
 export interface CreateAccountInput {
   fullName: string;

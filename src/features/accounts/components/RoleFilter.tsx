@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { cx } from "@/lib/cx";
-import { ROLE_LABEL } from "@/lib/permissions";
-import { ROLES } from "@/types/auth";
-import type { Role } from "@/types/auth";
+import { Button } from "@/shared/components/ui/Button";
+import { cx } from "@/shared/lib/cx";
+import { ROLE_LABEL } from "@/shared/lib/permissions";
+import { ROLES } from "@/shared/types/auth";
+import type { Role } from "@/shared/types/auth";
 import styles from "./RoleFilter.module.css";
 
 interface RoleFilterProps {

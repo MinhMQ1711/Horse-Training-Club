@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/components/layout/AuthProvider";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Icon } from "@/components/ui/Icon";
-import { useToast } from "@/components/ui/Toast";
-import { capitalize } from "@/lib/format";
-import { messageFor } from "@/lib/messages";
-import { ROLE_LABEL } from "@/lib/permissions";
-import type { ScreenAccess } from "@/lib/permissions";
+import { useCurrentUser } from "@/shared/components/layout/AuthProvider";
+import { Button } from "@/shared/components/ui/Button";
+import { Card } from "@/shared/components/ui/Card";
+import { Icon } from "@/shared/components/ui/Icon";
+import { useToast } from "@/shared/components/ui/Toast";
+import { capitalize } from "@/shared/lib/format";
+import { messageFor } from "@/shared/lib/messages";
+import { ROLE_LABEL } from "@/shared/lib/permissions";
+import type { ScreenAccess } from "@/shared/lib/permissions";
 import { logForbidden, requestPermission } from "../api";
 import type { ForbiddenInfo } from "../types";
 import styles from "./Forbidden403Page.module.css";

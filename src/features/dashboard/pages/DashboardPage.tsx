@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/components/layout/AuthProvider";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { givenName, padCount } from "@/lib/format";
-import { navFor, PERMISSIONS, ROLE_LABEL, ROLE_WORKSPACE } from "@/lib/permissions";
+import { useCurrentUser } from "@/shared/components/layout/AuthProvider";
+import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { Button } from "@/shared/components/ui/Button";
+import { Card } from "@/shared/components/ui/Card";
+import { givenName, padCount } from "@/shared/lib/format";
+import { navFor, PERMISSIONS, ROLE_LABEL, ROLE_WORKSPACE } from "@/shared/lib/permissions";
 import styles from "./DashboardPage.module.css";
 
 // Trang chủ tạm sau đăng nhập. Dashboard thật của từng vai trò thuộc Priority 5 (làm ở giai đoạn sau).

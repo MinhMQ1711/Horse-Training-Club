@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AuthLayout } from "@/components/layout/AuthLayout";
-import { Alert } from "@/components/ui/Alert";
-import { Button } from "@/components/ui/Button";
-import { formatDateTime } from "@/lib/format";
-import { ROLE_LABEL } from "@/lib/permissions";
-import type { Role } from "@/types/auth";
+import { AuthLayout } from "@/shared/components/layout/AuthLayout";
+import { Alert } from "@/shared/components/ui/Alert";
+import { Button } from "@/shared/components/ui/Button";
+import { formatDateTime } from "@/shared/lib/format";
+import { ROLE_LABEL } from "@/shared/lib/permissions";
+import type { Role } from "@/shared/types/auth";
 import { signupFlow } from "../flow";
 import type { RegistrationResult } from "../types";
 import styles from "./AuthPages.module.css";

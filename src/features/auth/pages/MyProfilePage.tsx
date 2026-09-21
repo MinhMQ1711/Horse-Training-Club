@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Field } from "@/components/form/Field";
-import { Input } from "@/components/form/Input";
-import { useAuth, useCurrentUser } from "@/components/layout/AuthProvider";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Switch } from "@/components/ui/Switch";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { useToast } from "@/components/ui/Toast";
-import { formatDate, formatDateTime, padCount } from "@/lib/format";
-import { messageFor } from "@/lib/messages";
-import { NOTIFY_META, notifyLock, PERMISSIONS, ROLE_LABEL } from "@/lib/permissions";
-import { ACCOUNT_STATUS } from "@/lib/status";
+import { Field } from "@/shared/components/form/Field";
+import { Input } from "@/shared/components/form/Input";
+import { useAuth, useCurrentUser } from "@/shared/components/layout/AuthProvider";
+import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { Avatar } from "@/shared/components/ui/Avatar";
+import { Badge } from "@/shared/components/ui/Badge";
+import { Button } from "@/shared/components/ui/Button";
+import { Card } from "@/shared/components/ui/Card";
+import { Switch } from "@/shared/components/ui/Switch";
+import { Tooltip } from "@/shared/components/ui/Tooltip";
+import { useToast } from "@/shared/components/ui/Toast";
+import { formatDate, formatDateTime, padCount } from "@/shared/lib/format";
+import { messageFor } from "@/shared/lib/messages";
+import { NOTIFY_META, notifyLock, PERMISSIONS, ROLE_LABEL } from "@/shared/lib/permissions";
+import { ACCOUNT_STATUS } from "@/shared/lib/status";
 import { updateNotification, updateProfile } from "../api";
 import styles from "./ProfilePages.module.css";
 
