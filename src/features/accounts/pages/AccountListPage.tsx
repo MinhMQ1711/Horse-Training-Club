@@ -1,7 +1,5 @@
-"use client";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useCurrentUser } from "@/shared/components/layout/AuthProvider";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -181,7 +179,7 @@ export default function AccountListPage() {
               Lock
             </Button>
           )}
-          <Link href={`/accounts/${r.id}/permissions`} className={styles.link}>
+          <Link to={`/accounts/${r.id}/permissions`} className={styles.link}>
             Permissions
           </Link>
         </div>

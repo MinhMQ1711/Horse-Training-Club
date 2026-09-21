@@ -1,8 +1,5 @@
-"use client";
-
 import { useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout, HERO_TEAM } from "@/shared/components/layout/AuthLayout";
 import { formatDateTime } from "@/shared/lib/format";
 import { useQueryParams } from "@/shared/lib/hooks";
@@ -12,13 +9,13 @@ import { OtpVerifyForm } from "../components/OtpVerifyForm";
 
 // Bước 2 của đăng ký: nhập mã OTP gửi về email. Đúng mã => yêu cầu chuyển tới Club Manager.
 export default function VerifyEmailPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const params = useQueryParams();
   const email = params?.get("email") ?? "";
 
   useEffect(() => {
-    if (params && !email) router.replace("/sign-up");
-  }, [params, email, router]);
+    if (params && !email) navigate("/sign-up", { replace: true });
+  }, [params, email, navigate]);
 
   if (!email) return null;
 
@@ -37,11 +34,11 @@ export default function VerifyEmailPage() {
         onVerify={async (code) => {
           const result = await verifyEmail(email, code);
           signupFlow.set(result);
-          router.push("/sign-up/pending");
+          navigate("/sign-up/pending");
         }}
         footer={
           <>
-            Wrong address? <Link href="/sign-up">Start over</Link>
+            Wrong address? <Link to="/sign-up">Start over</Link>
           </>
         }
       />

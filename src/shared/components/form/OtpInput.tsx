@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef } from "react";
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { cx } from "@/shared/lib/cx";

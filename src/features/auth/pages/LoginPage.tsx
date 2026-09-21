@@ -1,9 +1,6 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { Checkbox } from "@/shared/components/form/Checkbox";
@@ -18,7 +15,7 @@ import { safeNext } from "../flow";
 import styles from "./AuthPages.module.css";
 
 // Ở chế độ mock, điền sẵn email demo giống design (0.1). Backend thật thì để trống.
-const DEMO_EMAIL = process.env.NEXT_PUBLIC_USE_MOCK === "true" ? "nam.tran@equiflow.vn" : "";
+const DEMO_EMAIL = import.meta.env.VITE_USE_MOCK === "true" ? "nam.tran@equiflow.vn" : "";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RETRY_AFTER_MS = 10_000;
 
@@ -30,7 +27,7 @@ interface AlertState {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { status, signIn } = useAuth();
   const params = useQueryParams();
 
@@ -50,8 +47,8 @@ export default function LoginPage() {
 
   // Đã đăng nhập rồi mà vào /login thì đưa thẳng vào app.
   useEffect(() => {
-    if (status === "authenticated" && params) router.replace(next);
-  }, [status, params, next, router]);
+    if (status === "authenticated" && params) navigate(next, { replace: true });
+  }, [status, params, next, navigate]);
 
   useEffect(() => () => window.clearTimeout(retryTimer.current), []);
 
@@ -92,7 +89,7 @@ export default function LoginPage() {
       await signIn(mail, password, remember);
       window.clearTimeout(retryTimer.current);
       setAlert({ tone: "ok", icon: "checkCircle", title: "Signed in", body: "Opening your workspace." });
-      router.replace(next);
+      navigate(next, { replace: true });
     } catch (err) {
       window.clearTimeout(retryTimer.current);
       const failure = loginFailure(err);
@@ -151,7 +148,7 @@ export default function LoginPage() {
 
         <div className={styles.row}>
           <Checkbox label="Keep me signed in" checked={remember} onChange={setRemember} disabled={checking} />
-          <Link href="/forgot-password">Forgot password?</Link>
+          <Link to="/forgot-password">Forgot password?</Link>
         </div>
 
         <Button type="submit" size="lg" block iconAfter="arrowRight" disabled={checking} blockedReason={blockedReason}>
@@ -164,7 +161,7 @@ export default function LoginPage() {
         <p className={styles.foot}>
           {footNote ?? (
             <>
-              No account yet? <Link href="/sign-up">Sign up and wait for Club Manager approval</Link>
+              No account yet? <Link to="/sign-up">Sign up and wait for Club Manager approval</Link>
             </>
           )}
         </p>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { useAuth } from "@/shared/components/layout/AuthProvider";
 import { PageHeader } from "@/shared/components/layout/PageHeader";

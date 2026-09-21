@@ -1,8 +1,6 @@
-"use client";
-
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { registerApiHandlers } from "@/shared/lib/api";
 import { fetchMe, login, logout } from "@/shared/lib/auth";
 import type { AuthUser } from "@/shared/types/auth";
@@ -27,7 +25,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUserState] = useState<AuthUser | null>(null);
   const [expired, setExpired] = useState(false);
@@ -45,8 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 401 → Session Expired, 403 → trang Forbidden403 (theo CLAUDE.md).
   useEffect(() => {
-    registerApiHandlers({ onUnauthorized: markExpired, onForbidden: () => router.push("/forbidden") });
-  }, [markExpired, router]);
+    registerApiHandlers({ onUnauthorized: markExpired, onForbidden: () => navigate("/forbidden") });
+  }, [markExpired, navigate]);
 
   // Lúc mở trang: hỏi "tôi là ai" để khôi phục phiên.
   useEffect(() => {

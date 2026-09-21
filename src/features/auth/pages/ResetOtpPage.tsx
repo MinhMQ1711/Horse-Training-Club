@@ -1,8 +1,5 @@
-"use client";
-
 import { useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "@/shared/components/layout/AuthLayout";
 import { formatDateTime } from "@/shared/lib/format";
 import { useQueryParams } from "@/shared/lib/hooks";
@@ -12,13 +9,13 @@ import { OtpVerifyForm } from "../components/OtpVerifyForm";
 
 // Bước 2 quên mật khẩu (design 1.5, đã đổi từ "link" sang "mã OTP"): nhập mã nhận được qua email.
 export default function ResetOtpPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const params = useQueryParams();
   const email = params?.get("email") ?? "";
 
   useEffect(() => {
-    if (params && !email) router.replace("/forgot-password");
-  }, [params, email, router]);
+    if (params && !email) navigate("/forgot-password", { replace: true });
+  }, [params, email, navigate]);
 
   if (!email) return null;
 
@@ -34,11 +31,11 @@ export default function ResetOtpPage() {
         onVerify={async (code) => {
           const result = await verifyResetOtp(email, code);
           resetFlow.set({ email, token: result.resetToken, expiresAt: result.expiresAt });
-          router.push("/reset-password");
+          navigate("/reset-password");
         }}
         footer={
           <>
-            Wrong address? <Link href="/forgot-password">Enter a different email</Link>
+            Wrong address? <Link to="/forgot-password">Enter a different email</Link>
           </>
         }
       />

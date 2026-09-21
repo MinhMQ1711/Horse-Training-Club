@@ -18,8 +18,8 @@ export class ApiError extends Error {
   }
 }
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 interface ApiHandlers {
   onUnauthorized?: () => void;

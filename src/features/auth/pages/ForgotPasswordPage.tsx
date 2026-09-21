@@ -1,9 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { AuthLayout } from "@/shared/components/layout/AuthLayout";
@@ -19,7 +16,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Bước 1 quên mật khẩu: nhập email để nhận mã OTP.
 // Kết quả LUÔN giống nhau dù email có tồn tại hay không (thông báo trung tính).
 export default function ForgotPasswordPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [failure, setFailure] = useState("");
@@ -37,7 +34,7 @@ export default function ForgotPasswordPage() {
     setFailure("");
     try {
       await forgotPassword(mail);
-      router.push(`/forgot-password/verify?email=${encodeURIComponent(mail)}`);
+      navigate(`/forgot-password/verify?email=${encodeURIComponent(mail)}`);
     } catch (err) {
       if (err instanceof ApiError && err.code === "INVALID_EMAIL") setError("Email must look like name@equiflow.vn.");
       else setFailure(messageFor(err));
@@ -75,7 +72,7 @@ export default function ForgotPasswordPage() {
           {busy ? "Sending…" : "Send OTP"}
         </Button>
         <p className={styles.foot}>
-          <Link href="/login">Back to sign in</Link>
+          <Link to="/login">Back to sign in</Link>
         </p>
       </form>
     </AuthLayout>

@@ -1,7 +1,4 @@
-"use client";
-
-import Image from "next/image";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { Icon } from "@/shared/components/ui/Icon";
 import { cx } from "@/shared/lib/cx";
 import { initials } from "@/shared/lib/format";
@@ -27,7 +24,7 @@ export function Sidebar({ user, pathname, note, open, onNavigate }: SidebarProps
     <nav aria-label="Main navigation" className={cx(styles.nav, open && styles.open)}>
       <div className={styles.brand}>
         <span className={styles.logo}>
-          <Image src="/images/logo-fivegates.svg" alt="" width={26} height={26} />
+          <img src="/images/logo-fivegates.svg" alt="" width={26} height={26} />
         </span>
         <div>
           <strong>EquiFlow</strong>
@@ -52,7 +49,7 @@ export function Sidebar({ user, pathname, note, open, onNavigate }: SidebarProps
               return (
                 <Link
                   key={it.id}
-                  href={it.href}
+                  to={it.href}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cx(styles.item, active && styles.active)}

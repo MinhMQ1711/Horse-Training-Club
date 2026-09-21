@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { cx } from "@/shared/lib/cx";
 import styles from "./AuthLayout.module.css";
@@ -36,7 +35,7 @@ export function AuthLayout({ title, description, hero = HERO_DEFAULT, compact, c
     <div className={styles.page}>
       <section className={cx(styles.formPane, compact && styles.compact)}>
         <div className={styles.brand}>
-          <Image src="/images/logo-fivegates.svg" alt="EquiFlow" width={32} height={32} />
+          <img src="/images/logo-fivegates.svg" alt="EquiFlow" width={32} height={32} />
           <div>
             <strong>TMEC</strong>
             <span>THIEN MA EQUESTRIAN CLUB</span>
@@ -54,12 +53,9 @@ export function AuthLayout({ title, description, hero = HERO_DEFAULT, compact, c
       </section>
 
       <aside className={styles.hero} aria-hidden="true">
-        <Image
+        <img
           src="/images/equine-editorial.webp"
           alt=""
-          fill
-          priority
-          sizes="(max-width: 980px) 100vw, 60vw"
           className={styles.photo}
         />
         <div className={styles.scrim} />
@@ -74,7 +70,7 @@ export function AuthLayout({ title, description, hero = HERO_DEFAULT, compact, c
         </div>
         <div className={styles.heroMobile}>
           <div className={styles.mobileBrand}>
-            <Image src="/images/logo-fivegates.svg" alt="" width={26} height={26} />
+            <img src="/images/logo-fivegates.svg" alt="" width={26} height={26} />
             <strong>EquiFlow</strong>
           </div>
           <p>THIEN MA EQUESTRIAN CLUB</p>

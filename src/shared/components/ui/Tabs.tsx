@@ -1,5 +1,3 @@
-"use client";
-
 import { cx } from "@/shared/lib/cx";
 import styles from "./Tabs.module.css";
 

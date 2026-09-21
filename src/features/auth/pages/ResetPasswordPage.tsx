@@ -1,9 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { PasswordStrength } from "@/shared/components/form/PasswordStrength";
@@ -21,7 +18,7 @@ import styles from "./AuthPages.module.css";
 
 // Bước 3 quên mật khẩu (design 1.6): đặt mật khẩu mới sau khi OTP đã đúng.
 export default function ResetPasswordPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [flow, setFlow] = useState<ResetFlow | null | undefined>(undefined);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -34,8 +31,8 @@ export default function ResetPasswordPage() {
     const stored = resetFlow.get();
     setFlow(stored);
     // Chưa qua bước nhập OTP thì không vào được màn này.
-    if (!stored) router.replace("/forgot-password");
-  }, [router]);
+    if (!stored) navigate("/forgot-password", { replace: true });
+  }, [navigate]);
 
   if (!flow) return null;
 
@@ -59,7 +56,7 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword(flow.token, password);
       resetFlow.clear();
-      router.push("/login?reset=1");
+      navigate("/login?reset=1");
     } catch (err) {
       if (err instanceof ApiError && err.code === "RESET_EXPIRED") setExpired(true);
       else setAlert({ title: "Password not saved", body: messageFor(err) });
@@ -121,7 +118,7 @@ export default function ResetPasswordPage() {
           {busy ? "Saving…" : "Save password and sign in"}
         </Button>
         <p className={styles.foot}>
-          Code expired? <Link href="/forgot-password">Request a new one</Link>
+          Code expired? <Link to="/forgot-password">Request a new one</Link>
         </p>
       </form>
     </AuthLayout>

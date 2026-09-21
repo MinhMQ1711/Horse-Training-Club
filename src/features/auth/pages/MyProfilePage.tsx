@@ -1,7 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { useAuth, useCurrentUser } from "@/shared/components/layout/AuthProvider";
@@ -24,7 +22,7 @@ import styles from "./ProfilePages.module.css";
 export default function MyProfilePage() {
   const user = useCurrentUser();
   const { setUser } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const toast = useToast();
 
   const [fullName, setFullName] = useState(user.fullName);
@@ -149,7 +147,7 @@ export default function MyProfilePage() {
                   <b>{user.lastActive ? formatDateTime(user.lastActive) : "—"}</b>
                 </div>
               </div>
-              <Button tone="secondary" size="sm" block icon="key" onClick={() => router.push("/profile/password")}>
+              <Button tone="secondary" size="sm" block icon="key" onClick={() => navigate("/profile/password")}>
                 Change password
               </Button>
             </div>

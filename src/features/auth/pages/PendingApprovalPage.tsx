@@ -1,8 +1,5 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "@/shared/components/layout/AuthLayout";
 import { Alert } from "@/shared/components/ui/Alert";
 import { Button } from "@/shared/components/ui/Button";
@@ -15,7 +12,7 @@ import styles from "./AuthPages.module.css";
 
 // Design 1.3: yêu cầu đã tới Club Manager, chưa đăng nhập được cho tới khi được duyệt.
 export default function PendingApprovalPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [data, setData] = useState<RegistrationResult | null | undefined>(undefined);
 
   useEffect(() => {
@@ -61,13 +58,13 @@ export default function PendingApprovalPage() {
           Send a request first, or sign in if the account already exists.
         </Alert>
       )}
-      <Button tone="secondary" size="lg" block icon="arrowRight" onClick={() => router.push("/login")}>
+      <Button tone="secondary" size="lg" block icon="arrowRight" onClick={() => navigate("/login")}>
         Back to sign in
       </Button>
       <p className={styles.foot}>
         Wrong details?{" "}
         <Link
-          href="/sign-up"
+          to="/sign-up"
           onClick={() => {
             signupFlow.clear();
           }}
