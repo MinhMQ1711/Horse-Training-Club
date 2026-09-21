@@ -32,16 +32,26 @@ git checkout -b fe1/horses
 git push -u origin fe1/horses
 ```
 
-## Commits
+## Commit messages
 
-Short and specific, in Vietnamese or English. Say what changed, not "update code".
+GitHub shows the **first line** of the last commit next to every file, so write it as a short, clear sentence in English. Format: `type(scope): what changed`.
 
-```text
-Add horse list page with breed and owner filters
-Fix 403 redirect when the session has expired
-```
+| Type | Use it for | Example |
+|---|---|---|
+| `feat` | A new screen or behaviour | `feat(horses): add horse list with breed filter` |
+| `fix` | A bug fix | `fix(auth): keep the OTP countdown after refresh` |
+| `refactor` | Code change with no visible effect | `refactor: move lib and mock into shared` |
+| `docs` | README, docs, comments | `docs(api): add horse endpoints` |
+| `style` | Formatting only | `style: align table column widths` |
+| `chore` | Config, dependencies, tooling | `chore(lint): ignore .next output` |
+| `ci` | GitHub Actions | `ci: cache npm between runs` |
 
-Do not commit `node_modules/`, `.next/` or `.env.local`. They are already git-ignored, but check `git status` before committing.
+Rules of thumb:
+
+- Keep the first line under about 50 characters so it is not cut off in the file list.
+- Use the present tense: "add", not "added".
+- One commit should do one thing. Put the reason in the body, after a blank line.
+- Do not commit `node_modules/`, `.next/` or `.env.local`. They are git-ignored, but check `git status` before committing.
 
 ## Before you open a pull request
 
