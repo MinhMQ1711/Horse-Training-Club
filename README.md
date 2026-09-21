@@ -2,7 +2,7 @@
 
 <img src="public/images/logo-fivegates.svg" alt="EquiFlow logo" width="96" />
 
-# EquiFlow
+# TMEC
 
 **Web app for managing a racing-horse club: horse profiles, training plans, health care and reports, with a separate workspace for each of five roles.**
 
