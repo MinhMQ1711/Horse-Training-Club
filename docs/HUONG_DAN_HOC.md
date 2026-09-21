@@ -13,7 +13,7 @@ File này viết cho **người đã không tự gõ phần code này** nhưng p
 ```bash
 npm install
 cp .env.example .env.local        # Windows PowerShell: Copy-Item .env.example .env.local
-npm run dev                        # mở http://localhost:3000
+npm run dev                        # mở http://localhost:5173
 ```
 
 Mọi tài khoản đều có mật khẩu **`equiflow123`**. Mã OTP demo luôn là **`123456`**.
@@ -51,12 +51,12 @@ AuthProvider (shared/components/layout)        ← giữ "ai đang đăng nhập
    │ gọi login(...)
    ▼
 shared/lib/auth.ts  →  shared/lib/api.ts              ← cổng DUY NHẤT gọi backend
-   │  NEXT_PUBLIC_USE_MOCK=true
+   │  VITE_USE_MOCK=true
    ▼
 shared/mock/handlers.ts + shared/mock/db.ts           ← backend giả (dữ liệu trong localStorage)
 ```
 
-Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang không phải sửa** vì chúng chỉ nói chuyện với `api.ts`.
+Khi có backend thật, chỉ đổi `VITE_USE_MOCK=false`: **trang không phải sửa** vì chúng chỉ nói chuyện với `api.ts`.
 
 ---
 
@@ -64,18 +64,19 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 
 ### Bắt buộc phải nắm (thầy chắc chắn hỏi)
 
-**A. Next.js App Router** — `src/app/`
-- **Thư mục = URL.** `src/app/(auth)/login/page.tsx` → `/login`.
-- **`page.tsx`** là trang; **`layout.tsx`** là khung bọc các trang bên trong. `app/layout.tsx` (root) bọc mọi thứ và bắt buộc có `<html>`, `<body>`.
-- **Route group `(auth)`, `(app)`**: thư mục có ngoặc *không* vào URL, chỉ để gom trang dùng chung layout. `(app)/layout.tsx` bọc mọi trang sau đăng nhập bằng `AppShell`.
-- **Route động** `[id]`: `accounts/[id]/permissions/page.tsx`. Từ Next 15, `params` là **Promise** nên phải `await params`.
-- **Catch-all** `[...slug]`: bắt mọi đường dẫn chưa có trang (`/horses`, `/plans`...) để hiện trang "sắp có".
-- **Vì sao `page.tsx` chỉ có một dòng `export { default } from ...`?** Quy ước của nhóm: `app/` chỉ định tuyến, trang thật nằm ở `features/*/pages`.
+**A. React Router (định tuyến trong ứng dụng một trang)** — `src/app/router.tsx`
+- **Một file khai báo mọi route.** `{ path: "/login", element: <LoginPage /> }` nghĩa là URL `/login` hiện `LoginPage`.
+- **Route lồng nhau + `<Outlet />`:** route cha (`RootLayout`, `AppLayout`) bọc các route con. `AppLayout` chứa `AppShell` (Sidebar + Topbar) cho mọi trang sau đăng nhập.
+- **Route động** `:id`: `/accounts/:id/permissions`, lấy giá trị bằng `useParams()`.
+- **Route `*`** bắt mọi đường dẫn chưa có trang (`/horses`, `/plans`...) để hiện trang "sắp có".
+- **Chuyển trang:** `<Link to="...">` và `useNavigate()` (thay cho `<a>` và `window.location`, để không tải lại cả trang).
+- **Vì sao `router.tsx` tách khỏi `features/`?** Quy ước của nhóm: `app/` chỉ định tuyến, trang thật nằm ở `features/*/pages`.
 
-**B. Server Component và Client Component (`"use client"`)**
-- Mặc định file trong `app/` chạy ở server. File nào dùng `useState`, `useEffect`, `onClick`... phải có `"use client"` ở dòng đầu.
-- Server render HTML trước, trình duyệt "hydrate" (gắn sự kiện) sau. Vì vậy code đọc `localStorage`/`window` phải nằm trong `useEffect`, nếu không server và client render khác nhau → lỗi hydration.
-- Xem: `shared/lib/hooks.ts` (`useQueryParams`, `useToday` chỉ có giá trị sau khi mount).
+**B. Vite và ứng dụng một trang (SPA)**
+- Trình duyệt tải `index.html` một lần; `src/main.tsx` dựng React vào `<div id="root">`. Mọi code chạy ở **trình duyệt**, không có render phía server, nên không cần `"use client"`.
+- `npm run dev` chạy máy chủ phát triển của Vite (tải lại tức thì khi sửa code). `npm run build` chạy `tsc` kiểm tra kiểu rồi đóng gói ra `dist/`.
+- Biến môi trường phải bắt đầu bằng `VITE_` và đọc bằng `import.meta.env.VITE_...`. Vì chúng nằm trong file JS gửi cho người dùng, **không đặt bí mật vào đó**.
+- Xem: `shared/lib/hooks.ts` (`useQueryParams`, `useToday`).
 
 **C. React Context — `shared/components/layout/AuthProvider.tsx`**
 - Vấn đề: nhiều component xa nhau (Sidebar, Topbar, mọi trang) cần biết "ai đang đăng nhập" mà không muốn truyền props qua từng tầng.
@@ -131,7 +132,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 
 - **TypeScript generics** trong `DataTable<T>` và `Tabs<T>` (bảng/tab dùng lại cho mọi loại dữ liệu).
 - **`dangerouslySetInnerHTML`** trong `Icon.tsx`: an toàn vì chuỗi SVG là hằng số do nhóm viết, không chứa dữ liệu người dùng.
-- **`next/image`** cho ảnh nền và logo (`AuthLayout.tsx`).
+- **Ảnh nền và logo** (`AuthLayout.tsx`) là thẻ `<img>` thường; file ảnh nằm trong `public/images/`.
 - **Skeleton loading** trong `DataTable` (trạng thái đang tải), **Toast** (`ui/Toast.tsx`, Context + tự tắt sau ~4 giây).
 
 ---
@@ -152,21 +153,21 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 | Khung Sidebar / Topbar | `src/shared/components/layout/` |
 | Nút, bảng, hộp thoại, toast... | `src/shared/components/ui/` |
 | Ô nhập, chọn, checkbox, OTP | `src/shared/components/form/` |
-| Thêm một trang mới | tạo trang trong `features/<nghiệp vụ>/pages/`, rồi tạo thư mục + `page.tsx` (một dòng re-export) trong `src/app/` |
+| Thêm một trang mới | tạo trang trong `features/<nghiệp vụ>/pages/`, rồi thêm một dòng `{ path, element }` vào `src/app/router.tsx` |
 
 ---
 
 ## 4. Câu hỏi vấn đáp mẫu (tự trả lời trước khi xem gợi ý)
 
-1. **Vì sao chọn Next.js thay vì chỉ React?** — Routing theo thư mục, layout lồng nhau, render phía server (SEO/tải nhanh), tối ưu ảnh/font. Yêu cầu của môn học.
-2. **`"use client"` để làm gì?** — Đánh dấu component chạy ở trình duyệt (có state, sự kiện). Không có thì mặc định chạy ở server và không dùng được `useState`.
+1. **Vì sao chọn Vite + React?** — Vite khởi động và tải lại rất nhanh, cấu hình ít, đủ cho một ứng dụng quản trị chạy sau đăng nhập (không cần SEO hay render phía server). React Router lo định tuyến.
+2. **Ứng dụng một trang (SPA) khác trang web truyền thống thế nào?** — Trình duyệt chỉ tải một trang HTML; React Router đổi nội dung theo URL mà không tải lại; dữ liệu lấy qua API (`shared/lib/api.ts`).
 3. **Phiên đăng nhập được giữ thế nào?** — Với backend thật: cookie phiên do server set, FE gửi kèm (`credentials: "include"`). Ở mock: lưu `accountId` trong localStorage (nhớ đăng nhập) hoặc sessionStorage (không nhớ). `AuthProvider` hỏi `/auth/me` mỗi lần mở trang.
 4. **Làm sao chặn người không đủ quyền?** — 3 lớp cùng đọc `permissions.ts`: Sidebar ẩn mục, `RoleGuard` chặn route, API kiểm lại và trả 403. Nút bị chặn không ẩn mà disable + giải thích.
 5. **Quên mật khẩu bảo mật thế nào?** — Luôn trả thông báo trung tính; OTP có hạn, giới hạn số lần sai và thời gian gửi lại; mật khẩu mới phải đủ mạnh (`passwordError`).
 6. **Vì sao chỉ Horse Owner tự đăng ký được?** — Nhân viên do Club Manager tạo/mời. Form Sign Up vẫn hiện các vai trò khác nhưng khóa kèm lời giải thích.
 7. **Hết phiên xử lý ra sao?** — 30 phút không thao tác, hoặc API trả 401, hoặc Club Manager khóa tài khoản → hộp thoại *Session Expired* (không có nút đóng): đăng nhập lại để ở nguyên màn hình, hoặc rời đi.
 8. **Điều gì xảy ra khi thu hồi một quyền?** — Hộp xác nhận nêu hậu quả bằng số → sửa nháp → bấm Save → server ghi nhận + Audit Log → mục menu biến mất ở lần tải trang kế tiếp của tài khoản đó, URL trả 403.
-9. **Khi backend thật xong cần sửa gì?** — Đổi `NEXT_PUBLIC_USE_MOCK=false`, đảm bảo backend trả đúng hình dạng dữ liệu và mã lỗi như `shared/mock/handlers.ts`. Trang và component không phải sửa.
+9. **Khi backend thật xong cần sửa gì?** — Đổi `VITE_USE_MOCK=false`, đảm bảo backend trả đúng hình dạng dữ liệu và mã lỗi như `shared/mock/handlers.ts`. Trang và component không phải sửa.
 10. **Vì sao không dùng Tailwind/Material UI?** — Yêu cầu dự án: dùng design system riêng của EquiFlow qua CSS Modules và token.
 
 ---
@@ -176,7 +177,7 @@ Khi có backend thật, chỉ đổi `NEXT_PUBLIC_USE_MOCK=false`: **trang khôn
 1. **Dễ:** đổi thời gian hiệu lực OTP từ 10 phút sang 5 phút (`OTP_TTL`), thử lại luồng quên mật khẩu, thấy đồng hồ đếm ngược thay đổi.
 2. **Dễ:** thêm một tài khoản mẫu vai trò Groom trạng thái ACTIVE trong `shared/mock/accounts.ts` (xóa key `equiflow.mock.db.v1` để dữ liệu mới có hiệu lực).
 3. **Vừa:** thêm mục "Notifications" vào sidebar Club Manager (`ROLE_NAV.CLUB_MANAGER` trong `permissions.ts`). Bấm vào → thấy trang "sắp có". Hiểu vì sao không cần tạo route.
-4. **Vừa:** tạo route thật `/stalls` (thay trang "sắp có") theo đúng quy ước: viết `features/master-data/pages/StallMapPage.tsx`, tạo `src/app/(app)/stalls/page.tsx` một dòng re-export.
+4. **Vừa:** tạo route thật `/stalls` (thay trang "sắp có") theo đúng quy ước: viết `features/master-data/pages/StallMapPage.tsx`, thêm một dòng `{ path: "/stalls", element: <StallMapPage /> }` vào `src/app/router.tsx`.
 5. **Khó:** thêm quyền thứ 13 (ví dụ `exportReports`): thêm khóa vào `shared/types/auth.ts`, một mục trong `PERMISSIONS` và `DEFAULT_ON`. Xem nó tự xuất hiện trong màn Permissions.
 
 ---

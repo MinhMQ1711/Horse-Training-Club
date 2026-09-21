@@ -1,6 +1,6 @@
 # API contract
 
-What the web app expects from the backend. It is written from the mock API in [`src/shared/mock/handlers.ts`](../src/shared/mock/handlers.ts), which behaves exactly as the real backend must. When both sides agree on this file, switching `NEXT_PUBLIC_USE_MOCK` to `false` needs no change in any page.
+What the web app expects from the backend. It is written from the mock API in [`src/shared/mock/handlers.ts`](../src/shared/mock/handlers.ts), which behaves exactly as the real backend must. When both sides agree on this file, switching `VITE_USE_MOCK` to `false` needs no change in any page.
 
 > **Status:** covers Priority 1 (auth, accounts, profile). Endpoints for horses, training, health and dashboards will be added as each phase is built.
 
@@ -8,7 +8,8 @@ What the web app expects from the backend. It is written from the mock API in [`
 
 | Topic | Rule |
 |---|---|
-| Base URL | `NEXT_PUBLIC_API_URL`, for example `http://localhost:8080/api` |
+| Base URL | `VITE_API_URL`, for example `http://localhost:8080/api` |
+| CORS | While developing, the web app runs at `http://localhost:5173` and calls the backend on another port, so the backend must allow that origin **with credentials** (needed for the session cookie) |
 | Format | JSON in, JSON out. Dates are ISO-8601 strings (`2026-09-21T08:30:00Z`) |
 | Authentication | Server-side session in an `HttpOnly` cookie. The web app sends `credentials: "include"` on every call |
 | Session lifetime | Expires after 30 minutes without activity; the API then answers `401 UNAUTHENTICATED` |
