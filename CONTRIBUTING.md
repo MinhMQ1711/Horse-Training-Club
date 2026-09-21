@@ -43,7 +43,7 @@ GitHub shows the **first line** of the last commit next to every file, so write 
 | `refactor` | Code change with no visible effect | `refactor: move lib and mock into shared` |
 | `docs` | README, docs, comments | `docs(api): add horse endpoints` |
 | `style` | Formatting only | `style: align table column widths` |
-| `chore` | Config, dependencies, tooling | `chore(lint): ignore .next output` |
+| `chore` | Config, dependencies, tooling | `chore(lint): ignore dist output` |
 | `ci` | GitHub Actions | `ci: cache npm between runs` |
 
 Rules of thumb:
@@ -51,7 +51,7 @@ Rules of thumb:
 - Keep the first line under about 50 characters so it is not cut off in the file list.
 - Use the present tense: "add", not "added".
 - One commit should do one thing. Put the reason in the body, after a blank line.
-- Do not commit `node_modules/`, `.next/` or `.env.local`. They are git-ignored, but check `git status` before committing.
+- Do not commit `node_modules/`, `dist/` or `.env.local`. They are git-ignored, but check `git status` before committing.
 
 ## Before you open a pull request
 
@@ -69,7 +69,7 @@ Rules of thumb:
 
 | I want to… | Put it in |
 |---|---|
-| Add a page | Write it in `src/features/<flow>/pages/`, then add a thin `page.tsx` under `src/app/` that re-exports it |
+| Add a page | Write it in `src/features/<flow>/pages/`, then add one `{ path, element }` line for it to the route table in `src/app/router.tsx` |
 | Call a new API | `src/features/<flow>/api.ts` (uses `src/shared/lib/api.ts`) |
 | Add a menu item or change who may open a page | `src/shared/lib/permissions.ts` |
 | Add a reusable button, table or modal | `src/shared/components/ui/` |
