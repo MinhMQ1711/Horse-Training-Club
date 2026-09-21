@@ -7,7 +7,7 @@
 **Web app for managing a racing-horse club: horse profiles, training plans, health care and reports, with a separate workspace for each of five roles.**
 
 [![CI](https://github.com/MinhMQ1711/Horse-Training-Club/actions/workflows/ci.yml/badge.svg)](https://github.com/MinhMQ1711/Horse-Training-Club/actions/workflows/ci.yml)
-![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 ![Status](https://img.shields.io/badge/status-in%20development-315d45)
@@ -73,7 +73,7 @@ flowchart LR
   end
 
   subgraph FE["This repository"]
-    NEXT["Next.js web app"]
+    NEXT["React + Vite web app"]
     MOCK["Mock API<br/>localStorage"]
   end
 
@@ -103,7 +103,7 @@ More diagrams (request flow, sign-up and OTP sequences, account lifecycle, RBAC,
 
 | Area | Choice |
 |---|---|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
+| Framework | [React 19](https://react.dev/) single-page app, built with [Vite 8](https://vite.dev/), routed with [React Router 7](https://reactrouter.com/) |
 | Language | TypeScript (strict mode) |
 | Styling | Plain CSS + CSS Modules, design tokens from the EquiFlow Design System. No Tailwind, no UI kit |
 | Data | Mock API in the browser now; REST backend with session cookie later |
@@ -112,7 +112,7 @@ More diagrams (request flow, sign-up and OTP sequences, account lifecycle, RBAC,
 
 ## Getting started
 
-**Requirements:** Node.js 20.9 or newer, and npm.
+**Requirements:** Node.js 20.19 or newer, and npm.
 
 ```bash
 git clone https://github.com/MinhMQ1711/Horse-Training-Club.git
@@ -122,7 +122,7 @@ cp .env.example .env.local      # Windows PowerShell: Copy-Item .env.example .en
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:5173>.
 
 ### Demo accounts
 
@@ -147,7 +147,7 @@ Demo data lives in the browser's `localStorage`. To reset it, delete the key `eq
 |---|---|
 | `npm run dev` | Start the dev server with hot reload |
 | `npm run build` | Type-check and produce a production build. **Must pass before opening a pull request** |
-| `npm run start` | Serve the production build |
+| `npm run preview` | Serve the production build locally (run `npm run build` first) |
 | `npm run lint` | Lint the code with Oxlint |
 
 ### Configuration
@@ -156,8 +156,8 @@ Set in `.env.local` (never committed). Restart `npm run dev` after changing it.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `NEXT_PUBLIC_USE_MOCK` | `true` | `true` uses the built-in mock API. Set to `false` once the backend is ready |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8080/api` | Address of the real backend |
+| `VITE_USE_MOCK` | `true` | `true` uses the built-in mock API. Set to `false` once the backend is ready |
+| `VITE_API_URL` | `http://localhost:8080/api` | Address of the real backend |
 
 ## Project structure
 
@@ -173,9 +173,11 @@ Everything at the top level of the repository, and what it is for:
 | `.github/` | GitHub setup: CI workflow (lint + build), pull request and issue templates |
 | `package.json` | Project name, version, scripts (`npm run ...`) and the list of libraries |
 | `package-lock.json` | Exact library versions, so every machine installs the same thing. Never edit by hand |
+| `index.html` | The single HTML page. Vite mounts the React app into its `<div id="root">` |
+| `vite.config.ts` | Vite settings: the React plugin and the `@/` shortcut for `src/` |
 | `tsconfig.json` | TypeScript rules and the `@/` shortcut that points to `src/` |
 | `.oxlintrc.json` | Lint rules (catches common React mistakes) |
-| `.gitignore` | Files Git must not track: `node_modules`, `.next`, `.env.local` |
+| `.gitignore` | Files Git must not track: `node_modules`, `dist`, `.env.local` |
 | `.env.example` | Template for `.env.local`: mock switch and backend address |
 | `CLAUDE.md` | Working rules for the AI coding assistant the team uses |
 | `CONTRIBUTING.md` | Branches, commit messages, pull request checklist |
@@ -185,7 +187,8 @@ Everything at the top level of the repository, and what it is for:
 
 ```text
 src/
-├── app/                  Routes (Next.js App Router). Each page.tsx is thin
+├── main.tsx              Entry point: loads global CSS and mounts React
+├── app/                  router.tsx: the one table that maps each URL to a page
 ├── features/             One folder per business flow, created when its phase starts
 │   ├── auth/             Login, sign up, OTP, forgot password, profile      (P1, done)
 │   ├── accounts/         Account list, permissions                          (P1, done)
