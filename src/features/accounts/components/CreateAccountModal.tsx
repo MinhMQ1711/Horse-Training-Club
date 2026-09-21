@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Field } from "@/components/form/Field";
-import { Input } from "@/components/form/Input";
-import { Select } from "@/components/form/Select";
-import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { ApiError } from "@/lib/api";
-import { messageFor } from "@/lib/messages";
-import { ROLE_LABEL } from "@/lib/permissions";
-import type { PublicAccount, Role } from "@/types/auth";
+import { Field } from "@/shared/components/form/Field";
+import { Input } from "@/shared/components/form/Input";
+import { Select } from "@/shared/components/form/Select";
+import { Button } from "@/shared/components/ui/Button";
+import { Modal } from "@/shared/components/ui/Modal";
+import { ApiError } from "@/shared/lib/api";
+import { messageFor } from "@/shared/lib/messages";
+import { ROLE_LABEL } from "@/shared/lib/permissions";
+import type { PublicAccount, Role } from "@/shared/types/auth";
 import { createAccount } from "../api";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

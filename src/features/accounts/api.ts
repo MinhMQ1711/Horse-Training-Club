@@ -1,5 +1,5 @@
-import { api } from "@/lib/api";
-import type { PermissionMap, PublicAccount } from "@/types/auth";
+import { api } from "@/shared/lib/api";
+import type { PermissionMap, PublicAccount } from "@/shared/types/auth";
 import type { CreateAccountInput, SavePermissionsResult } from "./types";
 
 export const listAccounts = () => api<{ accounts: PublicAccount[] }>("GET", "/accounts");
