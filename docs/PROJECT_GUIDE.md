@@ -6,7 +6,7 @@
 
 Đây là phần **giao diện web (Frontend)**. Backend là REST API theo mô hình MVC, do nhóm khác làm riêng. Trong lúc backend chưa xong, FE chạy bằng **dữ liệu giả (mock)**.
 
-> **Trạng thái hiện tại:** đã làm xong **Phase 0 (đăng nhập) và Priority 1** — đăng ký, xác minh email bằng OTP, quên mật khẩu, khung app (Sidebar/Topbar), phân quyền RBAC, danh sách tài khoản, quyền từng tài khoản, 403, hết phiên, hồ sơ và đổi mật khẩu (16 route). Các feature còn lại (`horses`, `training`, `health`...) mới có khung thư mục. **Đọc [HUONG_DAN_HOC.md](HUONG_DAN_HOC.md)** để hiểu code, có tài khoản demo, mã OTP demo và câu hỏi vấn đáp mẫu.
+> **Trạng thái hiện tại:** đã làm xong **Phase 0 (đăng nhập) và Priority 1** — đăng ký, xác minh email bằng OTP, quên mật khẩu, khung app (Sidebar/Topbar), phân quyền RBAC, danh sách tài khoản, quyền từng tài khoản, 403, hết phiên, hồ sơ và đổi mật khẩu (16 route). Các feature còn lại (`horses`, `training`, `health`...) chưa được tạo; mỗi phase sẽ tạo thư mục của nó khi bắt đầu. **Đọc [HUONG_DAN_HOC.md](HUONG_DAN_HOC.md)** để hiểu code, có tài khoản demo, mã OTP demo và câu hỏi vấn đáp mẫu.
 
 ---
 
@@ -141,7 +141,7 @@ equiflow-web/
 
 **Quy tắc phụ thuộc:** `app` → `features` → `shared`. Feature **không import lẫn nhau**; thứ gì hai feature cùng cần thì đưa vào `shared/`.
 
-**Về file `.gitkeep`:** Git không lưu thư mục rỗng, nên thư mục feature chưa có code chứa một file `.gitkeep` rỗng. Khi thêm file thật thì xóa `.gitkeep` đi.
+**Thư mục feature chỉ được tạo khi bắt đầu phase của nó.** Hiện có `auth`, `accounts`, `dashboard`. Không tạo sẵn thư mục rỗng, file rỗng hay `.gitkeep`, vì Git không lưu thư mục rỗng và chúng chỉ làm rối repo. Các feature trong sơ đồ trên là kế hoạch.
 
 ---
 
