@@ -71,7 +71,7 @@ flowchart TB
 | Something two features both need moves into `shared/` | One copy, one place to fix |
 | Pages talk to `features/*/api.ts`, never to `fetch` | The mock/real switch stays in a single file |
 
-Feature folders and who owns them:
+Feature folders and who owns them. A folder is created only when its phase starts; today just `auth`, `accounts` and `dashboard` exist.
 
 ```mermaid
 flowchart LR
@@ -332,10 +332,10 @@ flowchart LR
 | Phase | Scope | Owner | Status |
 |---|---|---|---|
 | P1 | Sign up, OTP, forgot password, app shell, RBAC, accounts, permissions, 403, session expired, profile | FE1 | Done (16 routes) |
-| P2 | Horse profiles, intake, staff / supplies / stall master data | FE1 | Folders only |
-| P3 | Training plans, calendar, live monitor, threshold alerts | FE2 | Folders only |
-| P4 | Herd health, medical records, injury map, **Training Lock** | FE2 | Folders only |
-| P5 | Trainer / Manager dashboards, Owner report, audit log | FE1 + FE2 | Folders only |
+| P2 | Horse profiles, intake, staff / supplies / stall master data | FE1 | Not started |
+| P3 | Training plans, calendar, live monitor, threshold alerts | FE2 | Not started |
+| P4 | Herd health, medical records, injury map, **Training Lock** | FE2 | Not started |
+| P5 | Trainer / Manager dashboards, Owner report, audit log | FE1 + FE2 | Not started |
 | P6 | Stall map, rations, daily tasks, incidents (optional) | - | Not started |
 | P7 | Race entry and results (optional) | - | Not started |
 
