@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/shared/components/ui/Button";
 import { cx } from "@/shared/lib/cx";

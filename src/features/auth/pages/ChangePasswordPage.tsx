@@ -1,8 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { PasswordStrength } from "@/shared/components/form/PasswordStrength";
@@ -22,7 +20,7 @@ type Errors = Partial<Record<"current" | "next" | "confirm", string>>;
 
 // Design 1.16: đổi mật khẩu — mọi thiết bị khác bị đăng xuất sau khi lưu.
 export default function ChangePasswordPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const toast = useToast();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -135,7 +133,7 @@ export default function ChangePasswordPage() {
               <Button type="submit" icon="check" disabled={busy}>
                 {busy ? "Saving…" : "Save password"}
               </Button>
-              <Button tone="secondary" onClick={() => router.push("/profile")}>
+              <Button tone="secondary" onClick={() => navigate("/profile")}>
                 Back to profile
               </Button>
             </div>

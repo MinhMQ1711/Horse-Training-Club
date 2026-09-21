@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SessionExpiredModal } from "@/features/auth/components/SessionExpiredModal";
 import { ConfirmModal } from "@/shared/components/ui/ConfirmModal";
 import { breadcrumbFor } from "@/shared/lib/navigation";
@@ -19,16 +17,16 @@ import styles from "./AppShell.module.css";
 // Chưa đăng nhập => chuyển về /login (kèm ?next= để quay lại sau khi đăng nhập).
 export function AppShell({ children }: { children: ReactNode }) {
   const { status, user, expired, signOut, refresh } = useAuth();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [crumbTail, setCrumbTail] = useState<string | undefined>(undefined);
   const info = useSidebarInfo(user, pathname);
 
   useEffect(() => {
-    if (status === "anonymous") router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-  }, [status, pathname, router]);
+    if (status === "anonymous") navigate(`/login?next=${encodeURIComponent(pathname)}`, { replace: true });
+  }, [status, pathname, navigate]);
 
   // Mỗi lần đổi trang: đóng menu hẹp và hỏi lại server (quyền có thể vừa bị đổi).
   useEffect(() => {
@@ -75,7 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           onCancel={() => setLogoutOpen(false)}
           onConfirm={async () => {
             await signOut();
-            router.replace("/login");
+            navigate("/login", { replace: true });
           }}
         >
           The session for {user.fullName} · {ROLE_LABEL[user.role]} closes and the browser returns to the sign-in page. Keep me signed

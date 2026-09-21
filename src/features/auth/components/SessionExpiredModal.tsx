@@ -1,8 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
 import { useAuth } from "@/shared/components/layout/AuthProvider";
@@ -13,7 +11,7 @@ import { loginFailure, messageFor } from "@/shared/lib/messages";
 // Design 1.14: hộp thoại KHÔNG có nút đóng — bắt buộc chọn "đăng nhập lại" hoặc "rời đi".
 export function SessionExpiredModal() {
   const { user, signIn, signOut } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,7 +36,7 @@ export function SessionExpiredModal() {
 
   async function onLeave() {
     await signOut();
-    router.replace("/login");
+    navigate("/login", { replace: true });
   }
 
   return (

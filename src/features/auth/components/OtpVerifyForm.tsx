@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { Field } from "@/shared/components/form/Field";

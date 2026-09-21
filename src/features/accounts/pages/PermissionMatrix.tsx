@@ -1,7 +1,5 @@
-"use client";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useBreadcrumbTail } from "@/shared/components/layout/BreadcrumbContext";
 import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { Alert } from "@/shared/components/ui/Alert";
@@ -33,7 +31,7 @@ function effective(account: PublicAccount, perms: PermissionMap, meta: Permissio
 
 // Design 1.10 + 1.11: quyền của MỘT tài khoản — cấp/thu hồi, thu hồi phải xác nhận, lưu rồi mới có hiệu lực.
 export default function PermissionMatrix({ accountId }: { accountId: string }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const toast = useToast();
 
   const [account, setAccount] = useState<PublicAccount | null>(null);
@@ -100,7 +98,7 @@ export default function PermissionMatrix({ accountId }: { accountId: string }) {
                 : "The account service did not answer. Nothing was changed."
             }
             action={
-              <Button size="sm" icon={state === "missing" ? "arrowLeft" : "refresh"} onClick={() => (state === "missing" ? router.push("/accounts") : load())}>
+              <Button size="sm" icon={state === "missing" ? "arrowLeft" : "refresh"} onClick={() => (state === "missing" ? navigate("/accounts") : load())}>
                 {state === "missing" ? "Back to accounts" : "Try again"}
               </Button>
             }

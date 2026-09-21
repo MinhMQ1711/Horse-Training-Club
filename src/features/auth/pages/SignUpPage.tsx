@@ -1,9 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import type { FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "react-router-dom";
 import { Checkbox } from "@/shared/components/form/Checkbox";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
@@ -29,7 +26,7 @@ const ROLE_OPTIONS = [
 type Errors = Partial<Record<"name" | "email" | "password" | "confirm", string>>;
 
 export default function SignUpPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +70,7 @@ export default function SignUpPage() {
     try {
       await register({ fullName: name.trim(), email: mail, role: "HORSE_OWNER", password });
       // Bước kế tiếp: nhập mã OTP gửi về email.
-      router.push(`/sign-up/verify?email=${encodeURIComponent(mail)}`);
+      navigate(`/sign-up/verify?email=${encodeURIComponent(mail)}`);
     } catch (err) {
       if (err instanceof ApiError && err.code === "EMAIL_TAKEN") fail({ email: messageFor(err) });
       else {
@@ -174,7 +171,7 @@ export default function SignUpPage() {
         </Button>
 
         <p className={styles.foot}>
-          Already have an account? <Link href="/login">Sign in</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
         {hasErrors && <span className="sr-only" role="status">The form has errors.</span>}
       </form>

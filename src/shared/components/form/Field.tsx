@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useId } from "react";
 import type { ReactNode } from "react";
 import { Icon } from "@/shared/components/ui/Icon";

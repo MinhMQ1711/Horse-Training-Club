@@ -5,9 +5,10 @@
   "private": true,
   "type": "module",
   "keywords": [
-    "nextjs",
+    "vite",
     "react",
     "typescript",
+    "react-router",
     "rbac",
     "horse-racing",
     "club-management",
@@ -22,24 +23,26 @@
   },
   "homepage": "https://github.com/MinhMQ1711/Horse-Training-Club#readme",
   "engines": {
-    "node": ">=20.9"
+    "node": ">=20.19"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "lint": "oxlint",
-    "start": "next start"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint"
   },
   "dependencies": {
-    "next": "^16.3.5",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
   }
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { Icon } from "@/shared/components/ui/Icon";
 import { cx } from "@/shared/lib/cx";

@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useEffect } from "react";
 
 // Cho trang con "gắn thêm" một đoạn cuối vào breadcrumb (ví dụ tên tài khoản đang xem quyền).

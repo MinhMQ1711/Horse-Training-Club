@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { listAccounts } from "@/features/accounts/api";
 import { formatDate, padCount } from "@/shared/lib/format";

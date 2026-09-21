@@ -1,9 +1,7 @@
-"use client";
-
 import { useEffect, useState } from "react";
 
-// Đọc query string (?next=...&email=...) SAU khi trang đã hiện ở trình duyệt.
-// Trả về null trong lần render đầu (khi server dựng HTML) để tránh lệch giữa server và client.
+// Đọc query string (?next=...&email=...) của trang hiện tại.
+// Trả về null ở lần render đầu, có giá trị sau khi trang đã gắn vào trình duyệt.
 export function useQueryParams(): URLSearchParams | null {
   const [params, setParams] = useState<URLSearchParams | null>(null);
   useEffect(() => {
@@ -24,7 +22,7 @@ export function useCountdown(target: number | null): number {
   return target === null ? 0 : Math.max(0, target - now);
 }
 
-// Ngày hôm nay, chỉ có giá trị sau khi mount (tránh lệch múi giờ giữa server và client).
+// Ngày hôm nay, chỉ có giá trị sau khi trang đã gắn vào trình duyệt.
 export function useToday(): Date | null {
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => {

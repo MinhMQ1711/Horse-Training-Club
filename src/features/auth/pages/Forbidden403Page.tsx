@@ -1,7 +1,5 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/shared/components/layout/AuthProvider";
 import { Button } from "@/shared/components/ui/Button";
 import { Card } from "@/shared/components/ui/Card";
@@ -23,7 +21,7 @@ interface Forbidden403PageProps {
 // Design 1.13: khung app vẫn hiện để người dùng không bị "bỏ rơi".
 export default function Forbidden403Page({ access }: Forbidden403PageProps) {
   const user = useCurrentUser();
-  const router = useRouter();
+  const navigate = useNavigate();
   const toast = useToast();
   const [info, setInfo] = useState<ForbiddenInfo | null>(null);
   const [requested, setRequested] = useState(false);
@@ -79,7 +77,7 @@ export default function Forbidden403Page({ access }: Forbidden403PageProps) {
           </p>
         </div>
         <div className={styles.actions}>
-          <Button icon="home" onClick={() => router.push("/dashboard")}>
+          <Button icon="home" onClick={() => navigate("/dashboard")}>
             Back to my workspace
           </Button>
           <Button

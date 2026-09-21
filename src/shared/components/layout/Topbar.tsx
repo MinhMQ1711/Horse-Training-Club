@@ -1,5 +1,3 @@
-"use client";
-
 import { Icon } from "@/shared/components/ui/Icon";
 import { IconButton } from "@/shared/components/ui/IconButton";
 import { cx } from "@/shared/lib/cx";

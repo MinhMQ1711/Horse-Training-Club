@@ -1,10 +1,8 @@
 # Dependencies
 node_modules
 
-# Next.js build output
-.next
-out
-next-env.d.ts
+# Build output
+dist
 *.tsbuildinfo
 
 # Environment files with real values. Only .env.example is committed.
