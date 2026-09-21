@@ -1,6 +1,6 @@
 # TMEC - Quản lý CLB đua ngựa (Frontend)
 
-Đồ án SWP391. React + Vite + TypeScript. Đây là **khung trắng**: các file trong `src/` đều rỗng, chỉ để nhìn cấu trúc. Code được viết khi có yêu cầu.
+Đồ án SWP391. React + Vite + TypeScript. Đây là **khung trắng**: các file trong `src/features/` và `src/app/` đều rỗng, chỉ để nhìn cấu trúc. Phần dùng chung `src/shared/` đã có code (màu sắc, font, nút, bảng, hộp thoại, cổng gọi API...). Code các màn hình được viết khi có yêu cầu.
 
 Bản đã code xong Phase 0 + Priority 1 (đăng nhập, phân quyền) nằm ở tag `v0.1.0-priority1`.
 
