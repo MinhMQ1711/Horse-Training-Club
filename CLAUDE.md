@@ -84,9 +84,11 @@ src/
 - Mock phải có ít nhất 1 tài khoản cho mỗi vai trò và mỗi trạng thái.
 
 ## Phân công
-- FE1: components/ chung, auth, accounts, horses, intake, master-data (P1–P2)
-- FE2: training, health (P3–P4) — cả 2 phía của Training Lock thuộc FE2
-- Cả hai: dashboard (P5). P6–P7 làm nếu còn thời gian.
+- Pair 1 (FE1 — người dùng của phiên Claude Code này): components/ chung, auth, accounts, horses,
+  intake, master-data (P1–P2), dashboard (P5), stable (P6, phase 2).
+- Pair 2: training, health (P3–P4) — cả 2 phía của Training Lock thuộc Pair 2. Không code các màn này
+  trừ khi người dùng yêu cầu rõ ràng.
+- racing/ (P7): chưa phân công, không thuộc phạm vi mặc định của phiên này.
 
 ## Cách làm việc
 - Trước khi code một phạm vi mới: liệt kê màn hình + file sẽ tạo/sửa, chờ duyệt.

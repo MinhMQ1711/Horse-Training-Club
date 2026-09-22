@@ -1,8 +1,54 @@
 # TMEC - Quản lý CLB đua ngựa (Frontend)
 
-Đồ án SWP391. React + Vite + TypeScript. Đây là **khung trắng**: các file trong `src/features/` và `src/app/` đều rỗng, chỉ để nhìn cấu trúc. Phần dùng chung `src/shared/` đã có code (màu sắc, font, nút, bảng, hộp thoại, cổng gọi API...). Code các màn hình được viết khi có yêu cầu.
+Đồ án SWP391. **React 19 + Vite + TypeScript**, định tuyến bằng React Router.
 
-Bản đã code xong Phase 0 + Priority 1 (đăng nhập, phân quyền) nằm ở tag `v0.1.0-priority1`.
+Đã code xong **Giai đoạn 0 (đăng nhập) và Priority 1 (xác thực + phân quyền)** — 16 màn hình theo
+bản thiết kế trong `design-handoff`. Các nghiệp vụ sau (hồ sơ ngựa, giáo án, y tế...) mới có
+thư mục rỗng, sẽ code ở giai đoạn sau.
+
+## Chạy thử
+
+```bash
+npm install
+Copy-Item .env.example .env.local     # macOS/Linux: cp .env.example .env.local
+npm run dev
+```
+
+Mở http://localhost:5173
+
+| Lệnh | Tác dụng |
+|---|---|
+| `npm run dev` | Chạy server phát triển, tự tải lại khi sửa code |
+| `npm run build` | Kiểm tra kiểu TypeScript rồi đóng gói ra `dist/` |
+| `npm run preview` | Chạy thử bản đã đóng gói |
+| `npm run lint` | Kiểm tra lỗi code |
+
+## Tài khoản dùng thử
+
+Chưa có backend nên dữ liệu là **dữ liệu giả** lưu trong trình duyệt (`VITE_USE_MOCK=true`).
+Mọi tài khoản dùng mật khẩu **`equiflow123`**, mã OTP luôn là **`123456`**.
+
+| Email | Vai trò | Thấy gì |
+|---|---|---|
+| `viet.do@equiflow.vn` | Club Manager | Quản lý tài khoản và phân quyền |
+| `nam.tran@equiflow.vn` | Head Trainer | Menu huấn luyện; vào `/accounts` sẽ ra trang 403 |
+| `chau.le@equiflow.vn` | Veterinarian | Menu y tế |
+| `ha.ly@equiflow.vn` | Horse Owner | Menu chủ ngựa |
+| `binh.pham@equiflow.vn` | Groom | Tài khoản bị khóa - xem thông báo khi đăng nhập |
+| `anh.nguyen@equiflow.vn` | Horse Owner | Đang chờ duyệt - xem thông báo khi đăng nhập |
+
+Muốn xóa dữ liệu thử về ban đầu: F12 → Application → Local Storage → xóa `equiflow.mock.db.v1`.
+
+## Các màn hình đã có
+
+**Công khai:** Đăng nhập · Đăng ký · Nhập OTP xác minh email · Chờ duyệt · Quên mật khẩu ·
+Nhập OTP đặt lại · Đặt mật khẩu mới
+
+**Sau đăng nhập:** Dashboard · Danh sách tài khoản (duyệt, từ chối, khóa, mở khóa) ·
+Phân quyền từng tài khoản · Hồ sơ cá nhân · Đổi mật khẩu · Trang 403 · Hết phiên ·
+Trang "sắp có" cho các menu chưa code
+
+## Cấu trúc thư mục
 
 ```text
 Horse-Training-Club/
@@ -16,24 +62,28 @@ Horse-Training-Club/
 ├── CLAUDE.md                quy tắc làm việc
 └── src/
     ├── main.tsx             điểm khởi động
-    ├── app/
-    │   └── router.tsx       bảng đường dẫn: URL nào hiện trang nào
+    ├── app/                 TẦNG ĐỊNH TUYẾN
+    │   ├── router.tsx       bảng đường dẫn: URL nào hiện trang nào
+    │   └── RoleGuard.tsx    chặn trang khi tài khoản không đủ quyền
     ├── features/            MỖI NGHIỆP VỤ MỘT THƯ MỤC
-    │   ├── auth/            đăng nhập, đăng ký, OTP, hồ sơ cá nhân        (P1)
-    │   ├── accounts/        danh sách tài khoản, phân quyền               (P1)
-    │   ├── horses/          hồ sơ ngựa                                    (P2)
-    │   ├── master-data/     nhân viên, vật tư, chuồng                     (P2)
-    │   ├── training/        giáo án, lịch tập, cảnh báo                   (P3)
-    │   ├── health/          sức khỏe, khóa huấn luyện                     (P4)
-    │   ├── dashboard/       trang tổng quan, báo cáo, nhật ký             (P5)
-    │   ├── stable/          chuồng trại, khẩu phần (tùy chọn)             (P6)
-    │   └── racing/          thi đấu (tùy chọn)                            (P7)
+    │   ├── auth/            đăng nhập, đăng ký, OTP, hồ sơ cá nhân        (đã code)
+    │   ├── accounts/        danh sách tài khoản, phân quyền               (đã code)
+    │   ├── dashboard/       trang tổng quan                               (đã code)
+    │   ├── horses/          hồ sơ ngựa                                    (giai đoạn sau)
+    │   ├── master-data/     nhân viên, vật tư, chuồng                     (giai đoạn sau)
+    │   ├── training/        giáo án, lịch tập, cảnh báo                   (giai đoạn sau)
+    │   ├── health/          sức khỏe, khóa huấn luyện                     (giai đoạn sau)
+    │   ├── stable/          chuồng trại, khẩu phần                        (tùy chọn)
+    │   └── racing/          thi đấu                                       (tùy chọn)
     │      (mỗi feature có: pages/ = màn hình, components/ = mảnh giao diện,
     │       api.ts = gọi dữ liệu, types.ts = kiểu dữ liệu)
-    └── shared/              đồ dùng chung
+    └── shared/              ĐỒ DÙNG CHUNG cho mọi nghiệp vụ
         ├── components/      ui/ (nút, bảng, hộp thoại), form/ (ô nhập), layout/ (khung trang)
-        ├── lib/             hàm dùng chung (gọi API, phân quyền, ...)
+        ├── lib/             gọi API, phân quyền, nhãn trạng thái, câu báo lỗi
         ├── mock/            dữ liệu giả khi chưa có backend
         ├── styles/          màu, font, CSS chung
         └── types/           kiểu dữ liệu dùng chung
 ```
+
+**Quy tắc phụ thuộc:** `app` → `features` → `shared`. Import chỉ đi xuống.
+Một feature không được import feature khác; thứ gì hai feature cùng cần thì đưa vào `shared/`.
