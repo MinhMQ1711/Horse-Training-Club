@@ -14,6 +14,7 @@ What the web app expects from the backend. It was written from the mock API of t
 | Authentication | Server-side session in an `HttpOnly` cookie. The web app sends `credentials: "include"` on every call |
 | Session lifetime | Expires after 30 minutes without activity; the API then answers `401 UNAUTHENTICATED` |
 | Passwords | Never returned by any endpoint |
+| Email format | Must end with `@gmail.com` (enforced by the web app and the mock on register, invite-staff and forgot-password) — reject anything else with `400 VALIDATION` / `400 INVALID_EMAIL` |
 | Success | `2xx` with the body shown in each table below |
 | Error | Non-`2xx` with the body `{ "code": "SOME_CODE", "message": "text", "data": { ... } }` |
 
