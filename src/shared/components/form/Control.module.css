@@ -2,6 +2,18 @@
 .wrap { position: relative; display: flex; align-items: center; }
 .icon { position: absolute; left: 11px; color: var(--muted-2); pointer-events: none; display: flex; }
 .chevron { position: absolute; right: 10px; color: var(--muted-2); pointer-events: none; display: flex; }
+.toggle {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: var(--muted-2);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+.toggle:hover { color: var(--text-2); }
 
 .control {
   width: 100%;
@@ -19,6 +31,7 @@
 .control:disabled { background: var(--surface-2); cursor: not-allowed; }
 .control[readonly] { cursor: default; }
 .withIcon { padding-left: 33px; }
+.withToggle { padding-right: 33px; }
 .numeric { font-family: var(--font-numeric); font-variant-numeric: tabular-nums; }
 .invalid { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-bg); }
 
