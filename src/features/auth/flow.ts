@@ -10,6 +10,9 @@ export interface ResetFlow {
   email: string;
   token: string;
   expiresAt: number;
+  // "invite" = nhân viên đặt mật khẩu lần đầu từ lời mời (mặc định: quên mật khẩu).
+  kind?: "reset" | "invite";
+  fullName?: string;
 }
 
 function read<T>(key: string): T | null {

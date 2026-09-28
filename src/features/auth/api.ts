@@ -1,6 +1,6 @@
 import { api } from "@/shared/lib/api";
 import type { AuthUser, NotifyKey } from "@/shared/types/auth";
-import type { ForbiddenInfo, OtpPurpose, OtpTimes, RegisterInput, RegistrationResult, ResetVerifyResult } from "./types";
+import type { ForbiddenInfo, InviteVerifyResult, OtpPurpose, OtpTimes, RegisterInput, RegistrationResult, ResetVerifyResult } from "./types";
 
 // ---- đăng ký + xác minh email (OTP) ----
 export const register = (input: RegisterInput) => api<{ email: string } & OtpTimes>("POST", "/auth/register", input);
@@ -21,8 +21,13 @@ export const forgotPassword = (email: string) =>
 export const verifyResetOtp = (email: string, code: string) =>
   api<ResetVerifyResult>("POST", "/auth/reset-password/verify", { email, code });
 
+// Dùng chung cho quên mật khẩu và nhận lời mời (tài khoản INVITED được kích hoạt: activated = true).
 export const resetPassword = (resetToken: string, password: string) =>
-  api<{ ok: true }>("POST", "/auth/reset-password", { resetToken, password });
+  api<{ ok: true; activated?: boolean }>("POST", "/auth/reset-password", { resetToken, password });
+
+// ---- nhận lời mời (nhân viên): email + mã mời → đặt mật khẩu ----
+export const verifyInviteOtp = (email: string, code: string) =>
+  api<InviteVerifyResult>("POST", "/auth/accept-invite/verify", { email, code });
 
 // ---- hồ sơ cá nhân ----
 export const updateProfile = (input: { fullName: string; phone: string }) =>

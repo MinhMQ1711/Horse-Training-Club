@@ -21,13 +21,22 @@ import { ROLE_LABEL } from "@/shared/lib/permissions";
 import { ACCOUNT_STATUS, tabOf } from "@/shared/lib/status";
 import type { AccountTab } from "@/shared/lib/status";
 import type { PublicAccount, Role } from "@/shared/types/auth";
-import { listAccounts, runAccountAction } from "../api";
+import { deleteAccount, listAccounts, resendInvite, runAccountAction } from "../api";
 import type { AccountAction } from "../api";
 import { CreateAccountModal } from "../components/CreateAccountModal";
+import { EditAccountModal } from "../components/EditAccountModal";
+import { PermissionRequestsPanel } from "../components/PermissionRequestsPanel";
+import { ReasonConfirmModal } from "../components/ReasonConfirmModal";
 import { RoleFilter } from "../components/RoleFilter";
 import styles from "./AccountListPage.module.css";
 
 const PAGE_SIZE = 10;
+
+// Hộp thoại đang mở (một lúc chỉ một): sửa tài khoản, hoặc xác nhận một hành động.
+type Dialog = { kind: "edit" | "decline" | "lock" | "deactivate" | "delete"; target: PublicAccount };
+
+// Trạng thái có lý do do Club Manager ghi => hiện dưới badge ở cột Status.
+const SHOW_REASON: PublicAccount["status"][] = ["LOCKED", "INACTIVE", "REJECTED"];
 
 const EMPTY_COPY: Record<AccountTab, { title: string; description: string }> = {
   ALL: {
@@ -54,7 +63,7 @@ export default function AccountListPage() {
   const [roleFilter, setRoleFilter] = useState<Role | "ALL">("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [lockTarget, setLockTarget] = useState<PublicAccount | null>(null);
+  const [dialog, setDialog] = useState<Dialog | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -77,21 +86,49 @@ export default function AccountListPage() {
   const replace = (updated: PublicAccount) =>
     setAccounts((list) => (list ? list.map((a) => (a.id === updated.id ? updated : a)) : list));
 
-  async function run(target: PublicAccount, action: AccountAction) {
+  async function run(target: PublicAccount, action: AccountAction, reason?: string) {
     setBusy(true);
     try {
-      const res = await runAccountAction(target.id, action);
+      const res = await runAccountAction(target.id, action, reason);
       replace(res.account);
       const name = target.fullName;
-      if (action === "approve") toast.show(`Account approved. ${name} can sign in as ${ROLE_LABEL[target.role]}.`, "ok");
+      if (action === "approve") toast.show(`Account approved. ${name} was notified by email and can sign in as ${ROLE_LABEL[target.role]}.`, "ok");
       if (action === "decline") toast.show(`Request declined. ${name} was notified by email.`, "warn");
       if (action === "lock") toast.show(`Account locked. ${name} can no longer sign in.`, "warn");
       if (action === "unlock") toast.show(`Account unlocked. ${name} can sign in again.`, "ok");
+      if (action === "deactivate") toast.show(`Account deactivated. ${name} can no longer sign in; the records stay in place.`, "warn");
+      if (action === "reactivate") toast.show(`Account reactivated. ${name} can sign in again.`, "ok");
     } catch (err) {
       toast.show(messageFor(err), "danger");
     } finally {
       setBusy(false);
-      setLockTarget(null);
+      setDialog(null);
+    }
+  }
+
+  async function onResendInvite(target: PublicAccount) {
+    setBusy(true);
+    try {
+      await resendInvite(target.id);
+      toast.show(`A new invitation code was sent to ${target.email}.`, "ok");
+    } catch (err) {
+      toast.show(messageFor(err), "danger");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onDelete(target: PublicAccount) {
+    setBusy(true);
+    try {
+      await deleteAccount(target.id);
+      setAccounts((list) => (list ? list.filter((a) => a.id !== target.id) : list));
+      toast.show(`Account of ${target.fullName} deleted.`, "warn");
+    } catch (err) {
+      toast.show(messageFor(err), "danger");
+    } finally {
+      setBusy(false);
+      setDialog(null);
     }
   }
 
@@ -135,9 +172,33 @@ export default function AccountListPage() {
       width: 160,
       render: (r) => {
         const s = ACCOUNT_STATUS[r.status];
-        return <Badge tone={s.tone}>{s.label}</Badge>;
+        const reason = SHOW_REASON.includes(r.status) ? r.statusReason : null;
+        return (
+          <div className={styles.status}>
+            <Badge tone={s.tone}>{s.label}</Badge>
+            {reason && (
+              <span className={styles.reason} title={reason}>
+                {reason}
+              </span>
+            )}
+          </div>
+        );
       },
     },
+    // Chỉ ở tab Pending: lúc gửi yêu cầu (tài khoản INVITED không tự gửi => hiện lúc được mời).
+    ...(tab === "PENDING"
+      ? [
+          {
+            key: "requested",
+            header: "Requested",
+            width: 190,
+            render: (r: PublicAccount) =>
+              r.status === "INVITED"
+                ? `Invited ${formatDateTime(r.createdAt)}`
+                : formatDateTime(r.requestedAt ?? r.createdAt),
+          },
+        ]
+      : []),
     {
       key: "last",
       header: "Last active",
@@ -156,14 +217,24 @@ export default function AccountListPage() {
               <Button size="sm" icon="check" disabled={busy} onClick={() => run(r, "approve")}>
                 Approve
               </Button>
-              <Button tone="ghost" size="sm" disabled={busy} onClick={() => run(r, "decline")}>
+              <Button tone="ghost" size="sm" disabled={busy} onClick={() => setDialog({ kind: "decline", target: r })}>
                 Decline
               </Button>
             </>
           )}
+          {r.status === "INVITED" && (
+            <Button tone="secondary" size="sm" icon="mail" disabled={busy} onClick={() => onResendInvite(r)}>
+              Resend invite
+            </Button>
+          )}
           {r.status === "LOCKED" && (
             <Button tone="secondary" size="sm" icon="unlock" disabled={busy} onClick={() => run(r, "unlock")}>
               Unlock
+            </Button>
+          )}
+          {r.status === "INACTIVE" && (
+            <Button tone="secondary" size="sm" icon="refresh" disabled={busy} onClick={() => run(r, "reactivate")}>
+              Reactivate
             </Button>
           )}
           {r.status === "ACTIVE" && (
@@ -179,11 +250,14 @@ export default function AccountListPage() {
                     ? "The club must keep at least one active Club Manager."
                     : undefined
               }
-              onClick={() => setLockTarget(r)}
+              onClick={() => setDialog({ kind: "lock", target: r })}
             >
               Lock
             </Button>
           )}
+          <Button tone="ghost" size="sm" icon="edit" disabled={busy} aria-label={`Edit ${r.fullName}`} onClick={() => setDialog({ kind: "edit", target: r })}>
+            Edit
+          </Button>
           <Link to={`/accounts/${r.id}/permissions`} className={styles.link}>
             Permissions
           </Link>
@@ -232,6 +306,8 @@ export default function AccountListPage() {
           administrator if it keeps failing.
         </Alert>
       )}
+
+      <PermissionRequestsPanel />
 
       <Card pad={0}>
         <div className={styles.toolbar}>
@@ -296,19 +372,84 @@ export default function AccountListPage() {
         )}
       </Card>
 
-      {lockTarget && (
-        <ConfirmModal
-          title={`Lock the account of ${lockTarget.fullName}?`}
-          subtitle={`${ROLE_LABEL[lockTarget.role]} · ${lockTarget.email}`}
+      {dialog?.kind === "edit" && (
+        <EditAccountModal
+          account={dialog.target}
+          isSelf={dialog.target.id === me.id}
+          isLastManager={dialog.target.role === "CLUB_MANAGER" && dialog.target.status === "ACTIVE" && activeManagers <= 1}
+          onClose={() => setDialog(null)}
+          onSaved={(account) => {
+            replace(account);
+            setDialog(null);
+            toast.show(`Account of ${account.fullName} saved.`, "ok");
+          }}
+          onDeactivate={() => setDialog({ kind: "deactivate", target: dialog.target })}
+          onDelete={() => setDialog({ kind: "delete", target: dialog.target })}
+        />
+      )}
+
+      {dialog?.kind === "decline" && (
+        <ReasonConfirmModal
+          title={`Decline the request of ${dialog.target.fullName}?`}
+          subtitle={`${ROLE_LABEL[dialog.target.role]} · ${dialog.target.email}`}
+          tone="warn"
+          confirmLabel="Decline request"
+          cancelLabel="Keep waiting"
+          reasonHint="Sent in the email to the applicant and shown when they try to sign in."
+          busy={busy}
+          onCancel={() => setDialog(null)}
+          onConfirm={(reason) => run(dialog.target, "decline", reason)}
+        >
+          The account cannot be used. The applicant gets an email and may send a new request.
+        </ReasonConfirmModal>
+      )}
+
+      {dialog?.kind === "lock" && (
+        <ReasonConfirmModal
+          title={`Lock the account of ${dialog.target.fullName}?`}
+          subtitle={`${ROLE_LABEL[dialog.target.role]} · ${dialog.target.email}`}
           tone="danger"
           confirmLabel="Lock account"
           cancelLabel="Keep active"
+          reasonHint="Shown in the Locked tab and on the sign-in page of this account."
           busy={busy}
-          onCancel={() => setLockTarget(null)}
-          onConfirm={() => run(lockTarget, "lock")}
+          onCancel={() => setDialog(null)}
+          onConfirm={(reason) => run(dialog.target, "lock", reason)}
         >
-          Sign-in is refused from the next attempt and any open session ends within a minute. Records already entered by this account stay in
-          place. Unlocking is possible at any time from this list.
+          Sign-in is refused from the next attempt and every open session ends at once. Records already entered by this account stay in place.
+          Unlocking is possible at any time from this list.
+        </ReasonConfirmModal>
+      )}
+
+      {dialog?.kind === "deactivate" && (
+        <ReasonConfirmModal
+          title={`Deactivate the account of ${dialog.target.fullName}?`}
+          subtitle={`${ROLE_LABEL[dialog.target.role]} · ${dialog.target.email}`}
+          tone="danger"
+          confirmLabel="Deactivate account"
+          cancelLabel="Keep the account"
+          reasonHint="For example: contract ended. Shown on the sign-in page of this account."
+          busy={busy}
+          onCancel={() => setDialog(null)}
+          onConfirm={(reason) => run(dialog.target, "deactivate", reason)}
+        >
+          Use this when the person leaves the club. Sign-in stops and every session ends; everything this account recorded stays in place.
+          It can be reactivated from the All tab.
+        </ReasonConfirmModal>
+      )}
+
+      {dialog?.kind === "delete" && (
+        <ConfirmModal
+          title={`Delete the account of ${dialog.target.fullName}?`}
+          subtitle={`${ACCOUNT_STATUS[dialog.target.status].label} · ${dialog.target.email}`}
+          tone="danger"
+          confirmLabel="Delete account"
+          cancelLabel="Keep the account"
+          busy={busy}
+          onCancel={() => setDialog(null)}
+          onConfirm={() => onDelete(dialog.target)}
+        >
+          The account is removed for good. It was never used, so no records are lost. The email can be invited or registered again later.
         </ConfirmModal>
       )}
 

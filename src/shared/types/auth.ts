@@ -6,7 +6,7 @@ export { ROLES } from "./enums";
 import type { Role } from "./enums";
 
 // Trạng thái tài khoản. PENDING_APPROVAL là trạng thái "Pending Approval" trong design
-// (chờ Club Manager duyệt), các trạng thái còn lại theo CLAUDE.md.
+// (chờ Club Manager duyệt), các trạng thái còn lại theo quy tắc dự án.
 export type AccountStatus =
   | "PENDING_EMAIL"
   | "PENDING_APPROVAL"
@@ -50,10 +50,16 @@ export interface Account {
   requestedAt: string | null; // ISO — lúc gửi yêu cầu đăng ký
   requestCode: string | null; // REQ-2609-014
   lockedAt: string | null; // ISO
+  invitedBy: string | null; // tên Club Manager đã mời (tài khoản nhân viên)
+  // Lần đổi trạng thái gần nhất do Club Manager làm (duyệt / từ chối / khóa / vô hiệu hóa…), kèm lý do nếu có.
+  statusReason: string | null;
+  statusChangedAt: string | null; // ISO
+  statusChangedBy: string | null;
   permissions: PermissionMap;
   permissionsChangedAt: string | null;
   permissionsChangedBy: string | null;
   notify: NotifyMap;
+  updatedAt?: string; // ISO — backend thật trả về; mock không cần
 }
 
 // Bản gửi xuống trình duyệt: không bao giờ có mật khẩu.

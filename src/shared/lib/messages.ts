@@ -19,6 +19,11 @@ const GENERIC: Record<string, string> = {
   ROLE_NOT_ALLOWED: "Only Horse Owner accounts can be requested here. Staff accounts are created by the Club Manager.",
   WEAK_PASSWORD: "Add an uppercase letter, a digit or a symbol.",
   CANNOT_LOCK_SELF: "You cannot lock your own account. Ask another Club Manager.",
+  CANNOT_CHANGE_SELF: "You cannot do this to your own account. Ask another Club Manager.",
+  CANNOT_DELETE_USED: "This account has been used, so it cannot be deleted. Deactivate it instead to keep its history.",
+  INVALID_STATE: "The account changed in the meantime. Reload the list and try again.",
+  OTP_COOLDOWN: "A new invitation was sent less than a minute ago. Wait a moment before sending another.",
+  NOT_FOUND: "This account no longer exists. Reload the list.",
   LAST_MANAGER: "The club must keep at least one active Club Manager.",
   RESET_EXPIRED: "This reset session has expired. Request a new code.",
   FORBIDDEN: "This action is not part of your permissions.",
@@ -55,6 +60,10 @@ export interface LoginFailure {
   // Nút đăng nhập bị khóa + tooltip giải thích ai xử lý được.
   blockedReason?: string;
   footNote?: string;
+  // Khóa tạm sau 5 lần sai: mốc (ms) server cho phép thử lại — trang đăng nhập đếm ngược tới đây.
+  retryAt?: number;
+  // Nút đi tiếp trong Alert: nhập OTP xác minh email / nhận lời mời.
+  next?: "verifyEmail" | "acceptInvite";
 }
 
 // Kết quả đăng nhập thất bại (design 0.4 – 0.6) → nội dung Alert, nút và chú thích.
@@ -64,38 +73,47 @@ export function loginFailure(err: unknown): LoginFailure {
   }
   const d = err.data;
   const who = d.fullName ? `${d.fullName} · ${d.roleLabel}` : undefined;
+  // Lý do Club Manager ghi khi khóa / từ chối / vô hiệu hóa (có thể trống).
+  const reason = d.reason ? ` Reason: ${String(d.reason)}` : "";
 
   switch (err.code) {
     case "INVALID_CREDENTIALS": {
+      // Không nói rõ sai email hay sai mật khẩu. Chỉ khi còn đúng 1 lần mới cảnh báo thêm (WorkFlow 1 §3.2).
       const left = Number(d.attemptsLeft ?? 0);
       return {
         alert: {
           tone: "danger",
           icon: "alert",
           title: "Email or password is incorrect",
-          body: `${left} ${left === 1 ? "attempt" : "attempts"} left before the account is locked for 15 minutes.`,
+          body:
+            left === 1
+              ? "Check both fields and try again. 1 attempt remaining before this account is temporarily locked."
+              : "Check both fields and try again.",
         },
         passwordError: "Password is incorrect.",
         footNote: "Not sure of the password? Use Forgot password to set a new one",
       };
     }
-    case "ATTEMPTS_EXCEEDED":
+    case "ATTEMPTS_EXCEEDED": {
+      // Nội dung đếm ngược do trang đăng nhập dựng từ retryAt (thời gian lấy từ server, không tính ở client).
+      const retryAt = d.retryAt ? Date.parse(String(d.retryAt)) : undefined;
       return {
         alert: {
           tone: "danger",
           icon: "alert",
           title: "Too many attempts",
-          body: `The account is locked for 15 minutes${d.retryAt ? ` (until ${formatTime(String(d.retryAt))})` : ""}. Contact support@equiflow.vn if you need access now.`,
+          body: `Sign-in is paused for 15 minutes${retryAt ? ` (until ${formatTime(retryAt)})` : ""}. Use Forgot password to unlock it now.`,
         },
-        passwordError: "Password is incorrect.",
+        retryAt,
       };
+    }
     case "ACCOUNT_LOCKED":
       return {
         alert: {
           tone: "danger",
           icon: "ban",
           title: "Account is locked",
-          body: `The Club Manager locked this account at ${d.lockedAt ? formatDateTime(String(d.lockedAt)) : "an earlier time"}. Contact support@equiflow.vn to have it unlocked.`,
+          body: `The Club Manager locked this account at ${d.lockedAt ? formatDateTime(String(d.lockedAt)) : "an earlier time"}. Contact support@equiflow.vn to have it unlocked.${reason}`,
         },
         blockedReason: "Only the Club Manager can unlock an account.",
         footNote: who,
@@ -106,10 +124,10 @@ export function loginFailure(err: unknown): LoginFailure {
           tone: "warn",
           icon: "clock",
           title: "Account is pending approval",
-          body: `The request reached the Club Manager at ${d.requestedAt ? formatDateTime(String(d.requestedAt)) : "an earlier time"}. An email follows as soon as it is approved.`,
+          body: `The request${d.requestCode ? ` ${String(d.requestCode)}` : ""} reached the Club Manager at ${d.requestedAt ? formatDateTime(String(d.requestedAt)) : "an earlier time"}. Quote this code when you contact the club; an email follows as soon as it is approved.`,
         },
         blockedReason: "The account works only after the Club Manager approves it.",
-        footNote: who ? `${who}${d.requestedAt ? ` · requested ${formatDateTime(String(d.requestedAt)).split(" · ")[0]}` : ""}` : undefined,
+        footNote: who ? `${who}${d.requestCode ? ` · ${String(d.requestCode)}` : ""}` : undefined,
       };
     case "EMAIL_NOT_VERIFIED":
       return {
@@ -121,6 +139,7 @@ export function loginFailure(err: unknown): LoginFailure {
         },
         blockedReason: "Verify the email with the code first.",
         footNote: who,
+        next: "verifyEmail",
       };
     case "ACCOUNT_INVITED":
       return {
@@ -128,10 +147,11 @@ export function loginFailure(err: unknown): LoginFailure {
           tone: "info",
           icon: "mail",
           title: "Invitation not accepted yet",
-          body: "Use the invitation email from the Club Manager to set a password before signing in.",
+          body: "Open the invitation email from the Club Manager and enter its code on the Accept invitation page to set a password.",
         },
         blockedReason: "The invitation must be accepted first.",
         footNote: who,
+        next: "acceptInvite",
       };
     case "PENDING_INTAKE":
       return {
@@ -150,7 +170,7 @@ export function loginFailure(err: unknown): LoginFailure {
           tone: "danger",
           icon: "ban",
           title: "Account is inactive",
-          body: "This account was switched off. Contact support@equiflow.vn to reactivate it.",
+          body: `This account was switched off. Contact support@equiflow.vn to reactivate it.${reason}`,
         },
         blockedReason: "Only the Club Manager can reactivate an account.",
         footNote: who,
@@ -161,7 +181,7 @@ export function loginFailure(err: unknown): LoginFailure {
           tone: "danger",
           icon: "xCircle",
           title: "The request was declined",
-          body: "The Club Manager declined this account request. Send a new request if the details were wrong.",
+          body: `The Club Manager declined this account request.${reason} Send a new request if the details were wrong.`,
         },
         blockedReason: "The request was declined by the Club Manager.",
         footNote: who,

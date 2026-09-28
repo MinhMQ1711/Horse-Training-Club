@@ -15,6 +15,7 @@ import type { Account, NotifyKey, PermissionKey, PermissionMap, Role } from "@/s
 
 const OTP_CODE = "123456";
 const OTP_TTL = 10 * 60 * 1000;
+const INVITE_TTL = 48 * 3600 * 1000; // mã mời nhân viên còn hạn 48 giờ
 const OTP_COOLDOWN = 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 const LOGIN_MAX_FAILS = 5;
@@ -64,7 +65,8 @@ function findAccount(db: Db, id: string): Account {
 function issueOtp(db: Db, email: string, purpose: OtpPurpose): OtpRecord {
   const now = Date.now();
   const record: OtpRecord = {
-    email, purpose, code: OTP_CODE, sentAt: now, expiresAt: now + OTP_TTL, resendAt: now + OTP_COOLDOWN, attempts: 0,
+    email, purpose, code: OTP_CODE, sentAt: now, expiresAt: now + (purpose === "invite" ? INVITE_TTL : OTP_TTL),
+    resendAt: now + OTP_COOLDOWN, attempts: 0,
   };
   db.otps = db.otps.filter((o) => !(o.email === email && o.purpose === purpose));
   db.otps.push(record);
@@ -100,8 +102,28 @@ function requestCode(db: Db): string {
 }
 
 function purposeOf(value: unknown): OtpPurpose {
-  return value === "signup" ? "signup" : "reset";
+  return value === "signup" || value === "invite" ? value : "reset";
 }
+
+const REASON_MAX = 300;
+
+function reasonOf(body: Record<string, unknown>): string | null {
+  const reason = String(body.reason ?? "").trim();
+  if (reason.length > REASON_MAX) throw new ApiError(400, "VALIDATION", `Reason must be at most ${REASON_MAX} characters.`, { field: "reason" });
+  return reason || null;
+}
+
+// Không tự khóa / vô hiệu hóa chính mình; CLB luôn còn ít nhất 1 Club Manager hoạt động.
+function assertCanRemove(db: Db, actor: Account, target: Account, selfCode: string): void {
+  if (target.id === actor.id) throw new ApiError(409, selfCode, "Not allowed on your own account");
+  const activeManagers = db.accounts.filter((a) => a.role === "CLUB_MANAGER" && a.status === "ACTIVE");
+  if (target.role === "CLUB_MANAGER" && target.status === "ACTIVE" && activeManagers.length <= 1) {
+    throw new ApiError(409, "LAST_MANAGER", "Last manager");
+  }
+}
+
+// Chỉ xóa hẳn tài khoản chưa từng hoạt động; tài khoản đã dùng thì vô hiệu hóa.
+const DELETABLE: Account["status"][] = ["INVITED", "PENDING_EMAIL", "REJECTED"];
 
 // ------------------------------------------------------------------ các route
 
@@ -142,6 +164,8 @@ const routes: Route[] = [
         roleLabel: ROLE_LABEL[account.role],
         lockedAt: account.lockedAt,
         requestedAt: account.requestedAt,
+        requestCode: account.requestCode,
+        reason: account.statusReason,
       };
       const blocked: Partial<Record<Account["status"], [number, string]>> = {
         LOCKED: [423, "ACCOUNT_LOCKED"],
@@ -205,6 +229,7 @@ const routes: Route[] = [
       const account: Account = existing ?? {
         id: `u${Date.now()}`, fullName, email, role, status: "PENDING_EMAIL", password: "",
         phone: "", createdAt: new Date().toISOString(), lastActive: null, requestedAt: null, requestCode: null, lockedAt: null,
+        invitedBy: null, statusReason: null, statusChangedAt: null, statusChangedBy: null,
         permissions: defaultPermissions(role), permissionsChangedAt: null,
         permissionsChangedBy: null, notify: defaultNotify(role),
       };
@@ -310,9 +335,34 @@ const routes: Route[] = [
       account.password = String(body.password);
       delete db.resetTokens[String(body.resetToken)];
       db.loginFails[entry.email] = { fails: 0, lockedUntil: 0 };
-      audit(db, account.fullName, "PASSWORD_RESET", "Password changed with OTP");
+      // Nhân viên được mời đặt mật khẩu lần đầu => kích hoạt tài khoản.
+      const accepting = account.status === "INVITED";
+      if (accepting) {
+        account.status = "ACTIVE";
+        account.statusReason = null;
+        db.otps = db.otps.filter((o) => !(o.email === entry.email && o.purpose === "invite"));
+        audit(db, account.fullName, "INVITE_ACCEPTED", "Password set; account is active");
+      } else {
+        audit(db, account.fullName, "PASSWORD_RESET", "Password changed with OTP");
+      }
       saveDb(db);
-      return { ok: true };
+      return { ok: true, activated: accepting };
+    },
+  },
+
+  // ----- nhận lời mời (nhân viên): mã trong email mời → vé đặt mật khẩu -----
+  {
+    method: "POST",
+    pattern: /^\/auth\/accept-invite\/verify$/,
+    handler({ db, body }) {
+      const email = norm(body.email);
+      const invited = db.accounts.find((a) => a.email.toLowerCase() === email && a.status === "INVITED");
+      checkOtp(db, email, "invite", String(body.code ?? ""), Boolean(invited));
+      const token = `rt_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+      const expiresAt = Date.now() + OTP_TTL;
+      db.resetTokens[token] = { email, expiresAt };
+      saveDb(db);
+      return { resetToken: token, expiresAt, fullName: invited?.fullName ?? "", role: invited?.role ?? null };
     },
   },
 
@@ -338,15 +388,17 @@ const routes: Route[] = [
       const email = norm(body.email);
       const fullName = String(body.fullName ?? "").trim();
       const role = body.role as Role;
-      if (!fullName || !EMAIL_RE.test(email) || !ROLE_LABEL[role]) throw new ApiError(400, "VALIDATION", "Invalid input");
+      if (!fullName || !EMAIL_RE.test(email) || !ROLE_LABEL[role] || role === "HORSE_OWNER") throw new ApiError(400, "VALIDATION", "Invalid input");
       if (db.accounts.some((a) => a.email.toLowerCase() === email)) throw new ApiError(409, "EMAIL_TAKEN", "Email taken");
       const account: Account = {
         id: `u${Date.now()}`, fullName, email, role, status: "INVITED", password: "", phone: "",
         createdAt: new Date().toISOString(), lastActive: null, requestedAt: null, requestCode: null, lockedAt: null,
+        invitedBy: actor.fullName, statusReason: null, statusChangedAt: null, statusChangedBy: null,
         permissions: defaultPermissions(role), permissionsChangedAt: null, permissionsChangedBy: null,
         notify: defaultNotify(role),
       };
       db.accounts.push(account);
+      issueOtp(db, email, "invite"); // backend thật gửi email kèm mã mời
       audit(db, actor.fullName, "ACCOUNT_INVITED", `${fullName} invited as ${ROLE_LABEL[role]}`);
       saveDb(db);
       return { account: toPublic(account) };
@@ -362,33 +414,105 @@ const routes: Route[] = [
   },
   {
     method: "POST",
-    pattern: /^\/accounts\/([^/]+)\/(approve|decline|lock|unlock)$/,
-    handler({ db, params }) {
+    pattern: /^\/accounts\/([^/]+)\/(approve|decline|lock|unlock|deactivate|reactivate)$/,
+    handler({ db, params, body }) {
       const actor = currentUser(db);
       requirePermission(actor, "manageAccounts");
       const target = findAccount(db, params[0]);
       const action = params[1];
+      const reason = reasonOf(body);
 
-      if (action === "approve") {
+      if (action === "approve" || action === "decline") {
         if (target.status !== "PENDING_APPROVAL") throw new ApiError(409, "INVALID_STATE", "Not waiting for approval");
-        target.status = "ACTIVE";
-      } else if (action === "decline") {
-        if (target.status !== "PENDING_APPROVAL") throw new ApiError(409, "INVALID_STATE", "Not waiting for approval");
-        target.status = "REJECTED";
+        target.status = action === "approve" ? "ACTIVE" : "REJECTED";
+        target.statusReason = action === "approve" ? null : reason;
       } else if (action === "lock") {
-        if (target.id === actor.id) throw new ApiError(409, "CANNOT_LOCK_SELF", "Cannot lock yourself");
-        const activeManagers = db.accounts.filter((a) => a.role === "CLUB_MANAGER" && a.status === "ACTIVE");
-        if (target.role === "CLUB_MANAGER" && activeManagers.length <= 1) throw new ApiError(409, "LAST_MANAGER", "Last manager");
+        if (target.status !== "ACTIVE") throw new ApiError(409, "INVALID_STATE", "Only an active account can be locked");
+        assertCanRemove(db, actor, target, "CANNOT_LOCK_SELF");
         target.status = "LOCKED";
         target.lockedAt = new Date().toISOString();
-      } else {
+        target.statusReason = reason;
+      } else if (action === "unlock") {
         if (target.status !== "LOCKED") throw new ApiError(409, "INVALID_STATE", "Not locked");
         target.status = "ACTIVE";
         target.lockedAt = null;
+        target.statusReason = null;
+      } else if (action === "deactivate") {
+        if (target.status !== "ACTIVE" && target.status !== "LOCKED") throw new ApiError(409, "INVALID_STATE", "Cannot deactivate");
+        assertCanRemove(db, actor, target, "CANNOT_CHANGE_SELF");
+        target.status = "INACTIVE";
+        target.lockedAt = null;
+        target.statusReason = reason;
+      } else {
+        if (target.status !== "INACTIVE") throw new ApiError(409, "INVALID_STATE", "Not inactive");
+        target.status = "ACTIVE";
+        target.statusReason = null;
       }
-      audit(db, actor.fullName, `ACCOUNT_${action.toUpperCase()}`, target.fullName);
+      target.statusChangedAt = new Date().toISOString();
+      target.statusChangedBy = actor.fullName;
+      audit(db, actor.fullName, `ACCOUNT_${action.toUpperCase()}`, reason ? `${target.fullName} — ${reason}` : target.fullName);
       saveDb(db);
       return { account: toPublic(target) };
+    },
+  },
+  {
+    method: "POST",
+    pattern: /^\/accounts\/([^/]+)\/resend-invite$/,
+    handler({ db, params }) {
+      const actor = currentUser(db);
+      requirePermission(actor, "manageAccounts");
+      const target = findAccount(db, params[0]);
+      if (target.status !== "INVITED") throw new ApiError(409, "INVALID_STATE", "Not an open invitation");
+      const email = target.email.toLowerCase();
+      const existing = db.otps.find((o) => o.email === email && o.purpose === "invite");
+      if (existing && existing.resendAt > Date.now()) {
+        throw new ApiError(429, "OTP_COOLDOWN", "Wait before requesting a new code", { resendAt: existing.resendAt });
+      }
+      const record = issueOtp(db, email, "invite");
+      audit(db, actor.fullName, "INVITE_RESENT", target.fullName);
+      saveDb(db);
+      return { account: toPublic(target), ...otpTimes(record) };
+    },
+  },
+  {
+    method: "PUT",
+    pattern: /^\/accounts\/([^/]+)$/,
+    handler({ db, params, body }) {
+      const actor = currentUser(db);
+      requirePermission(actor, "manageAccounts");
+      const target = findAccount(db, params[0]);
+      const fullName = String(body.fullName ?? "").trim();
+      const phone = String(body.phone ?? "").trim();
+      if (!fullName) throw new ApiError(400, "VALIDATION", "Full name is required.", { field: "fullName" });
+      if (phone.length > 30) throw new ApiError(400, "VALIDATION", "Phone number is too long.", { field: "phone" });
+      const changes: string[] = [];
+      if (fullName !== target.fullName) changes.push(`name ${target.fullName} → ${fullName}`);
+      if (phone !== target.phone) changes.push(`phone ${target.phone || "—"} → ${phone || "—"}`);
+      if (changes.length > 0) {
+        audit(db, actor.fullName, "ACCOUNT_EDITED", `${target.fullName}: ${changes.join(", ")}`);
+        target.fullName = fullName;
+        target.phone = phone;
+        saveDb(db);
+      }
+      return { account: toPublic(target) };
+    },
+  },
+  {
+    method: "DELETE",
+    pattern: /^\/accounts\/([^/]+)$/,
+    handler({ db, params }) {
+      const actor = currentUser(db);
+      requirePermission(actor, "manageAccounts");
+      const target = findAccount(db, params[0]);
+      if (target.id === actor.id) throw new ApiError(409, "CANNOT_CHANGE_SELF", "Not allowed on your own account");
+      if (!DELETABLE.includes(target.status)) throw new ApiError(409, "CANNOT_DELETE_USED", "Deactivate it instead");
+      const email = target.email.toLowerCase();
+      db.accounts = db.accounts.filter((a) => a.id !== target.id);
+      db.otps = db.otps.filter((o) => o.email !== email);
+      delete db.loginFails[email];
+      audit(db, actor.fullName, "ACCOUNT_DELETED", `${target.fullName} (${target.email}, ${target.status})`);
+      saveDb(db);
+      return { ok: true };
     },
   },
   {
@@ -480,13 +604,64 @@ const routes: Route[] = [
     pattern: /^\/permission-requests$/,
     handler({ db, body }) {
       const user = currentUser(db);
-      db.requests.unshift({ at: new Date().toISOString(), from: user.fullName, screen: String(body.screen ?? ""), reference: String(body.reference ?? "") });
-      audit(db, user.fullName, "PERMISSION_REQUESTED", String(body.screen ?? ""));
+      const screen = String(body.screen ?? "");
+      const reference = String(body.reference ?? "");
+      // Đã có yêu cầu đang chờ cho cùng màn hình => cập nhật lại, không tạo trùng.
+      const open = db.requests.find((r) => r.accountId === user.id && r.screen === screen && r.status === "OPEN");
+      if (open) {
+        open.reference = reference;
+        open.at = new Date().toISOString();
+      } else {
+        const id = db.requests.reduce((max, r) => Math.max(max, r.id), 0) + 1;
+        db.requests.unshift({ id, at: new Date().toISOString(), accountId: user.id, screen, reference, status: "OPEN", resolvedAt: null, resolvedBy: null });
+      }
+      audit(db, user.fullName, "PERMISSION_REQUESTED", screen);
       saveDb(db);
       return { ok: true };
     },
   },
+
+  // ----- danh sách chờ của Club Manager -----
+  {
+    method: "GET",
+    pattern: /^\/permission-requests$/,
+    handler({ db, url }) {
+      requirePermission(currentUser(db), "manageAccounts");
+      const all = url.searchParams.get("status") === "ALL";
+      const requests = db.requests
+        .filter((r) => all || r.status === "OPEN")
+        .sort((a, b) => b.at.localeCompare(a.at))
+        .map((r) => withAccount(db, r));
+      return { requests };
+    },
+  },
+  {
+    method: "POST",
+    pattern: /^\/permission-requests\/(\d+)\/resolve$/,
+    handler({ db, params, body }) {
+      const actor = currentUser(db);
+      requirePermission(actor, "manageAccounts");
+      const status = body.status;
+      if (status !== "GRANTED" && status !== "DISMISSED") throw new ApiError(400, "VALIDATION", "Status must be GRANTED or DISMISSED");
+      const request = db.requests.find((r) => r.id === Number(params[0]));
+      if (!request) throw new ApiError(404, "NOT_FOUND", "Request not found");
+      if (request.status !== "OPEN") throw new ApiError(409, "INVALID_STATE", "Request already handled");
+      request.status = status;
+      request.resolvedAt = new Date().toISOString();
+      request.resolvedBy = actor.fullName;
+      const who = db.accounts.find((a) => a.id === request.accountId)?.fullName ?? "unknown";
+      audit(db, actor.fullName, `PERMISSION_REQUEST_${status}`, `${who}: ${request.screen} (${request.reference})`);
+      saveDb(db);
+      return { request: withAccount(db, request) };
+    },
+  },
 ];
+
+// Yêu cầu cấp quyền kèm thông tin người gửi (giống `include: { account }` của backend).
+function withAccount(db: Db, r: Db["requests"][number]) {
+  const a = db.accounts.find((x) => x.id === r.accountId);
+  return { ...r, account: a ? { id: a.id, fullName: a.fullName, email: a.email, role: a.role } : null };
+}
 
 // ------------------------------------------------------------------ điểm vào
 

@@ -30,12 +30,12 @@ Mọi tài khoản dùng mật khẩu **`equiflow123`**, mã OTP luôn là **`12
 
 | Email | Vai trò | Thấy gì |
 |---|---|---|
-| `viet.do@equiflow.vn` | Club Manager | Quản lý tài khoản và phân quyền |
-| `nam.tran@equiflow.vn` | Head Trainer | Menu huấn luyện; vào `/accounts` sẽ ra trang 403 |
-| `chau.le@equiflow.vn` | Veterinarian | Menu y tế |
-| `ha.ly@equiflow.vn` | Horse Owner | Menu chủ ngựa |
-| `binh.pham@equiflow.vn` | Groom | Tài khoản bị khóa - xem thông báo khi đăng nhập |
-| `anh.nguyen@equiflow.vn` | Horse Owner | Đang chờ duyệt - xem thông báo khi đăng nhập |
+| `viet.do@gmail.com` | Club Manager | Quản lý tài khoản và phân quyền |
+| `nam.tran@gmail.com` | Head Trainer | Menu huấn luyện; vào `/accounts` sẽ ra trang 403 |
+| `chau.le@gmail.com` | Veterinarian | Menu y tế |
+| `ha.ly@gmail.com` | Horse Owner | Menu chủ ngựa |
+| `binh.pham@gmail.com` | Groom | Tài khoản bị khóa - xem thông báo khi đăng nhập |
+| `anh.nguyen@gmail.com` | Horse Owner | Đang chờ duyệt - xem thông báo khi đăng nhập |
 
 Muốn xóa dữ liệu thử về ban đầu: F12 → Application → Local Storage → xóa `equiflow.mock.db.v1`.
 
@@ -53,13 +53,12 @@ Trang "sắp có" cho các menu chưa code
 ```text
 Horse-Training-Club/
 ├── public/                  ảnh, font, logo
-├── docs/                    tài liệu hệ thống: ARCHITECTURE.md (sơ đồ), API_CONTRACT.md (API)
+├── docs/                    WorkFlow_*.md (luồng chuẩn để làm theo), API_CONTRACT.md (API)
 ├── index.html               trang HTML duy nhất
 ├── package.json             danh sách thư viện và lệnh chạy
 ├── vite.config.ts           cấu hình Vite
 ├── tsconfig.json            cấu hình TypeScript
 ├── .env.example             mẫu biến môi trường
-├── CLAUDE.md                quy tắc làm việc
 └── src/
     ├── main.tsx             điểm khởi động
     ├── app/                 TẦNG ĐỊNH TUYẾN

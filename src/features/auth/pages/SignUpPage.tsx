@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Checkbox } from "@/shared/components/form/Checkbox";
 import { Field } from "@/shared/components/form/Field";
 import { Input } from "@/shared/components/form/Input";
-import { Select } from "@/shared/components/form/Select";
 import { AuthLayout, HERO_TEAM } from "@/shared/components/layout/AuthLayout";
 import { Alert } from "@/shared/components/ui/Alert";
 import { Button } from "@/shared/components/ui/Button";
@@ -16,13 +15,7 @@ import styles from "./AuthPages.module.css";
 
 const EMAIL_RE = /^[^\s@]+@gmail\.com$/i;
 
-// Chỉ Horse Owner được tự đăng ký. Các vai trò khác vẫn HIỆN nhưng bị khóa kèm lời giải thích (không ẩn).
-const ROLE_OPTIONS = [
-  { value: "HORSE_OWNER", label: "Horse Owner" },
-  { value: "HEAD_TRAINER", label: "Head Trainer (created by the Club Manager)", disabled: true },
-  { value: "VETERINARIAN", label: "Veterinarian (created by the Club Manager)", disabled: true },
-  { value: "GROOM", label: "Groom / Stable Hand (created by the Club Manager)", disabled: true },
-];
+// Trang này CHỈ để Horse Owner tự đăng ký (không có ô chọn vai trò); nhân viên do Club Manager mời.
 
 type Errors = Partial<Record<"name" | "email" | "password" | "confirm", string>>;
 
@@ -89,8 +82,8 @@ export default function SignUpPage() {
     <AuthLayout
       compact
       hero={HERO_TEAM}
-      title="Request an account at the club."
-      description="The Club Manager reviews every request and grants the role before the account can be used."
+      title="Request a Horse Owner account."
+      description="For owners who keep horses at the club. The Club Manager reviews every request before the account can be used. Staff accounts are created by the Club Manager."
     >
       <form onSubmit={onSubmit} noValidate style={{ display: "contents" }}>
         {alertBody && (
@@ -124,10 +117,6 @@ export default function SignUpPage() {
               clearError("email");
             }}
           />
-        </Field>
-
-        <Field label="Role requested" required hint="Only Horse Owner accounts can be requested here. Staff accounts are created by the Club Manager.">
-          <Select options={ROLE_OPTIONS} value="HORSE_OWNER" onChange={() => {}} />
         </Field>
 
         <Field label="Password" required error={errors.password}>

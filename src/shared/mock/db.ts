@@ -9,7 +9,7 @@ import type { Account, PublicAccount } from "@/shared/types/auth";
 
 const KEY = "equiflow.mock.db.v1";
 
-export type OtpPurpose = "signup" | "reset";
+export type OtpPurpose = "signup" | "reset" | "invite";
 
 export interface OtpRecord {
   email: string;
@@ -29,10 +29,14 @@ export interface AuditEntry {
 }
 
 export interface PermissionRequest {
+  id: number;
   at: string;
-  from: string;
+  accountId: string;
   screen: string;
   reference: string;
+  status: "OPEN" | "GRANTED" | "DISMISSED";
+  resolvedAt: string | null;
+  resolvedBy: string | null;
 }
 
 export interface Db {
@@ -49,7 +53,9 @@ export interface Db {
 function fresh(): Db {
   return {
     seedVersion: SEED_VERSION, accounts: seedAccounts(), otps: [], loginFails: {},
-    resetTokens: {}, audit: [], requests: [], seq: 14,
+    resetTokens: {}, audit: [], seq: 14,
+    // Một yêu cầu cấp quyền đang chờ (giống seed của backend).
+    requests: [{ id: 1, at: "2026-09-19T07:30:00", accountId: "nam", screen: "Audit Log", reference: "403-2609-0071", status: "OPEN", resolvedAt: null, resolvedBy: null }],
   };
 }
 

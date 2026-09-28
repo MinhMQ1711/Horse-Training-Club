@@ -1,74 +1,38 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { Field } from "@/shared/components/form/Field";
-import { Input } from "@/shared/components/form/Input";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { Button } from "@/shared/components/ui/Button";
 import { Modal } from "@/shared/components/ui/Modal";
-import { loginFailure, messageFor } from "@/shared/lib/messages";
 
-// Design 1.14: hộp thoại KHÔNG có nút đóng — bắt buộc chọn "đăng nhập lại" hoặc "rời đi".
+// WorkFlow 1 §5: hộp thoại KHÔNG đóng được (không Esc, không nhấp nền, không nút X) — một nút duy nhất
+// "Sign in again": xóa phiên phía trình duyệt, về trang đăng nhập và nhớ trang đang đứng (?next=) để quay lại.
+// AuthProvider chỉ bật hộp này một lần dù nhiều request cùng trả 401.
 export function SessionExpiredModal() {
-  const { user, signIn, signOut } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { pathname, search } = useLocation();
   const [busy, setBusy] = useState(false);
 
-  async function onContinue(e: FormEvent) {
-    e.preventDefault();
-    if (!user) return;
-    if (!password) {
-      setError("Password is required.");
-      return;
-    }
+  async function onSignInAgain() {
     setBusy(true);
-    setError("");
-    try {
-      await signIn(user.email, password, true); // thành công => AuthProvider tự đóng hộp thoại
-    } catch (err) {
-      setError(loginFailure(err).alert.body || messageFor(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onLeave() {
-    await signOut();
-    navigate("/login", { replace: true });
+    const here = pathname + search;
+    await signOut(); // server đã quên phiên; lời gọi này chỉ để xóa cookie, lỗi cũng bỏ qua
+    navigate(`/login?next=${encodeURIComponent(here)}`, { replace: true });
   }
 
   return (
-    <Modal title="The session has expired" subtitle="Signed out after 30 minutes without activity." tone="warn" width={430}>
-      <form onSubmit={onContinue} noValidate style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <p style={{ margin: 0 }}>
-          Work typed into this form is kept in the browser and restored after signing in again. Nothing was sent to the server.
-        </p>
-        <Field label={`Password for ${user?.email ?? "your account"}`} required error={error}>
-          <Input
-            type="password"
-            icon="key"
-            placeholder="Enter password to continue"
-            autoComplete="current-password"
-            value={password}
-            disabled={busy}
-            data-autofocus
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError("");
-            }}
-          />
-        </Field>
-        <div style={{ display: "flex", gap: 9 }}>
-          <Button type="submit" iconAfter="arrowRight" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in and continue"}
-          </Button>
-          <Button tone="secondary" onClick={onLeave} disabled={busy}>
-            Leave and discard
-          </Button>
-        </div>
-      </form>
+    <Modal
+      title="The session has expired"
+      subtitle="Signed out after 30 minutes without activity, or the account was changed by the Club Manager."
+      tone="warn"
+      width={430}
+      foot={
+        <Button iconAfter="arrowRight" disabled={busy} onClick={onSignInAgain} data-autofocus>
+          {busy ? "Opening sign-in…" : "Sign in again"}
+        </Button>
+      }
+    >
+      Nothing on this page was sent to the server after the session closed. Sign in again to come back to this page.
     </Modal>
   );
 }

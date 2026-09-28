@@ -17,6 +17,7 @@ import type { ResetFlow } from "../flow";
 import styles from "./AuthPages.module.css";
 
 // Bước 3 quên mật khẩu (design 1.6): đặt mật khẩu mới sau khi OTP đã đúng.
+// Cũng là bước cuối của Accept Invite (flow.kind = "invite"): nhân viên đặt mật khẩu lần đầu.
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [flow, setFlow] = useState<ResetFlow | null | undefined>(undefined);
@@ -35,6 +36,8 @@ export default function ResetPasswordPage() {
   }, [navigate]);
 
   if (!flow) return null;
+  const invite = flow.kind === "invite";
+  const restart = invite ? `/accept-invite?email=${encodeURIComponent(flow.email)}` : "/forgot-password";
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -56,7 +59,7 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword(flow.token, password);
       resetFlow.clear();
-      navigate("/login?reset=1");
+      navigate(invite ? "/login?invited=1" : "/login?reset=1");
     } catch (err) {
       if (err instanceof ApiError && err.code === "RESET_EXPIRED") setExpired(true);
       else setAlert({ title: "Password not saved", body: messageFor(err) });
@@ -67,12 +70,16 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout
-      title="Choose the new password."
-      description={`Resetting for ${flow.email}. The code was accepted; this step expires at ${formatDateTime(flow.expiresAt).split(" · ")[1]}.`}
+      title={invite ? "Choose your password." : "Choose the new password."}
+      description={
+        invite
+          ? `Welcome${flow.fullName ? `, ${flow.fullName}` : ""}. The invitation for ${flow.email} was accepted; set a password before ${formatDateTime(flow.expiresAt).split(" · ")[1]} to activate the account.`
+          : `Resetting for ${flow.email}. The code was accepted; this step expires at ${formatDateTime(flow.expiresAt).split(" · ")[1]}.`
+      }
     >
       <form onSubmit={onSubmit} noValidate style={{ display: "contents" }}>
         {expired && (
-          <Alert tone="warn" icon="clock" title="This reset has expired">
+          <Alert tone="warn" icon="clock" title={invite ? "This step has expired" : "This reset has expired"}>
             Request a new code to set the password.
           </Alert>
         )}
@@ -115,10 +122,10 @@ export default function ResetPasswordPage() {
         </Field>
 
         <Button type="submit" size="lg" block iconAfter="arrowRight" disabled={busy || expired}>
-          {busy ? "Saving…" : "Save password and sign in"}
+          {busy ? "Saving…" : invite ? "Activate account" : "Save password and sign in"}
         </Button>
         <p className={styles.foot}>
-          Code expired? <Link to="/forgot-password">Request a new one</Link>
+          Code expired? <Link to={restart}>Request a new one</Link>
         </p>
       </form>
     </AuthLayout>

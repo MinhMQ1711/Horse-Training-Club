@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, Outlet, useParams } from "react-router-dom";
 import AccountListPage from "@/features/accounts/pages/AccountListPage";
+import AcceptInvitePage from "@/features/auth/pages/AcceptInvitePage";
 import PermissionMatrix from "@/features/accounts/pages/PermissionMatrix";
 import ChangePasswordPage from "@/features/auth/pages/ChangePasswordPage";
 import Forbidden403Page from "@/features/auth/pages/Forbidden403Page";
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
       { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/forgot-password/verify", element: <ResetOtpPage /> },
       { path: "/reset-password", element: <ResetPasswordPage /> },
+      { path: "/accept-invite", element: <AcceptInvitePage /> },
 
       // ---- Trang sau đăng nhập (nằm trong khung AppShell)
       {

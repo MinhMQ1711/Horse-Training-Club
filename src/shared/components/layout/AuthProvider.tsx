@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (statusRef.current === "authenticated") setExpired(true);
   }, []);
 
-  // 401 → Session Expired, 403 → trang Forbidden403 (theo CLAUDE.md).
+  // 401 → Session Expired, 403 → trang Forbidden403.
   useEffect(() => {
     registerApiHandlers({ onUnauthorized: markExpired, onForbidden: () => navigate("/forbidden") });
   }, [markExpired, navigate]);

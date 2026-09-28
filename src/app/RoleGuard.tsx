@@ -4,7 +4,7 @@ import Forbidden403Page from "@/features/auth/pages/Forbidden403Page";
 import { screenAccess } from "@/shared/lib/permissions";
 import { useAuth } from "@/shared/components/layout/AuthProvider";
 
-// Chặn route theo quyền (CLAUDE.md quy tắc 3). Một chỗ duy nhất kiểm tra — các trang KHÔNG tự kiểm vai trò.
+// Chặn route theo quyền. Một chỗ duy nhất kiểm tra — các trang KHÔNG tự kiểm vai trò.
 // Bị chặn thì hiện 403 ngay tại URL hiện tại (giữ khung app), không chuyển trang.
 export function RoleGuard({ children }: { children: ReactNode }) {
   const { user } = useAuth();

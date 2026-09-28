@@ -9,8 +9,10 @@ import { AuthLayout } from "@/shared/components/layout/AuthLayout";
 import { Alert } from "@/shared/components/ui/Alert";
 import type { AlertTone } from "@/shared/components/ui/Alert";
 import { Button } from "@/shared/components/ui/Button";
-import { useQueryParams } from "@/shared/lib/hooks";
+import { formatCountdown, formatTime } from "@/shared/lib/format";
+import { useCountdown, useQueryParams } from "@/shared/lib/hooks";
 import { loginFailure } from "@/shared/lib/messages";
+import type { LoginFailure } from "@/shared/lib/messages";
 import { safeNext } from "../flow";
 import { EMAIL_PLACEHOLDER } from "@/shared/lib/brand";
 import styles from "./AuthPages.module.css";
@@ -39,10 +41,16 @@ export default function LoginPage() {
   const [alert, setAlert] = useState<AlertState | null>(null);
   const [blockedReason, setBlockedReason] = useState<string | undefined>();
   const [footNote, setFootNote] = useState<string | undefined>();
+  const [nextStep, setNextStep] = useState<LoginFailure["next"]>();
+  // Khóa tạm sau 5 lần sai: mốc do server trả (retryAt). F5 thì thử lại sẽ nhận lại đúng mốc này.
+  const [lockUntil, setLockUntil] = useState<number | null>(null);
+  const lockLeft = useCountdown(lockUntil);
+  const locked = lockLeft > 0;
   const retryTimer = useRef<number | undefined>(undefined);
 
   const next = safeNext(params?.get("next"));
   const justReset = params?.get("reset") === "1";
+  const justInvited = params?.get("invited") === "1";
 
   // Đã đăng nhập rồi mà vào /login thì đưa thẳng vào app.
   useEffect(() => {
@@ -55,11 +63,12 @@ export default function LoginPage() {
   function clearOutcome() {
     setBlockedReason(undefined);
     setFootNote(undefined);
+    setNextStep(undefined);
   }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (checking) return;
+    if (checking || locked) return;
 
     const mail = email.trim().toLowerCase();
     let eErr = "";
@@ -92,23 +101,57 @@ export default function LoginPage() {
     } catch (err) {
       window.clearTimeout(retryTimer.current);
       const failure = loginFailure(err);
-      setAlert(failure.alert);
+      // Khóa tạm: Alert đếm ngược (lockAlert) lo phần hiển thị, không giữ thêm bản tĩnh.
+      setAlert(failure.retryAt ? null : failure.alert);
       setPasswordError(failure.passwordError ?? "");
       setBlockedReason(failure.blockedReason);
       setFootNote(failure.footNote);
+      setNextStep(failure.next);
+      setLockUntil(failure.retryAt ?? null);
       setChecking(false);
     }
   }
 
-  const banner: AlertState | null = alert ?? (justReset
+  // Đang khóa tạm: Alert đếm ngược sống; hết giờ thì báo có thể thử lại.
+  const lockAlert: AlertState | null =
+    lockUntil === null
+      ? null
+      : locked
+        ? {
+            tone: "danger",
+            icon: "alert",
+            title: "Too many attempts",
+            body: `Sign-in is paused for this account. Try again in ${formatCountdown(lockLeft)} (at ${formatTime(lockUntil)}), or use Forgot password to unlock it now.`,
+          }
+        : { tone: "info", icon: "clock", title: "You can try again now", body: "The 15-minute pause is over. Enter the password again." };
+  const mail = email.trim().toLowerCase();
+
+  const banner: AlertState | null = lockAlert ?? alert ?? (justReset
     ? { tone: "ok", icon: "checkCircle", title: "Password saved", body: "All other sessions were signed out. Sign in with the new password." }
-    : null);
+    : justInvited
+      ? { tone: "ok", icon: "checkCircle", title: "Invitation accepted", body: "The account is active. Sign in with your email and the password you just chose." }
+      : null);
 
   return (
     <AuthLayout title="Sign in to start your shift." description="Use the club account you were issued. Each role sees only the work it is granted.">
       <form onSubmit={onSubmit} noValidate style={{ display: "contents" }}>
         {banner && (
-          <Alert tone={banner.tone} icon={banner.icon} title={banner.title}>
+          <Alert
+            tone={banner.tone}
+            icon={banner.icon}
+            title={banner.title}
+            action={
+              nextStep === "verifyEmail" ? (
+                <Button size="sm" tone="secondary" onClick={() => navigate(`/sign-up/verify?email=${encodeURIComponent(mail)}`)}>
+                  Enter the code
+                </Button>
+              ) : nextStep === "acceptInvite" ? (
+                <Button size="sm" tone="secondary" onClick={() => navigate(`/accept-invite?email=${encodeURIComponent(mail)}`)}>
+                  Accept invitation
+                </Button>
+              ) : undefined
+            }
+          >
             {banner.body}
           </Alert>
         )}
@@ -125,6 +168,8 @@ export default function LoginPage() {
               setEmail(e.target.value);
               setEmailError("");
               clearOutcome();
+              // Khóa tạm tính theo email: đổi email thì bỏ đồng hồ (email mới được thử bình thường).
+              setLockUntil(null);
             }}
           />
         </Field>
@@ -150,7 +195,14 @@ export default function LoginPage() {
           <Link to="/forgot-password">Forgot password?</Link>
         </div>
 
-        <Button type="submit" size="lg" block iconAfter="arrowRight" disabled={checking} blockedReason={blockedReason}>
+        <Button
+          type="submit"
+          size="lg"
+          block
+          iconAfter="arrowRight"
+          disabled={checking}
+          blockedReason={locked ? `Sign-in is paused. Try again in ${formatCountdown(lockLeft)}.` : blockedReason}
+        >
           {checking ? "Signing in…" : "Enter workspace"}
         </Button>
 
@@ -163,6 +215,9 @@ export default function LoginPage() {
               No account yet? <Link to="/sign-up">Sign up and wait for Club Manager approval</Link>
             </>
           )}
+        </p>
+        <p className={styles.foot}>
+          Invited as staff? <Link to="/accept-invite">Accept the invitation</Link>
         </p>
       </form>
     </AuthLayout>

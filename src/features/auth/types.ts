@@ -1,6 +1,6 @@
 // Kiểu dữ liệu riêng của feature auth (khớp phản hồi của các route /auth/* ở backend).
 
-export type OtpPurpose = "signup" | "reset";
+export type OtpPurpose = "signup" | "reset" | "invite";
 
 // Mốc thời gian (mili-giây epoch) của mã OTP đang hiệu lực.
 export interface OtpTimes {
@@ -29,6 +29,12 @@ export interface RegistrationResult {
 export interface ResetVerifyResult {
   resetToken: string;
   expiresAt: number;
+}
+
+// Nhân viên nhập đúng mã mời => vé đặt mật khẩu + tên, vai trò đã được mời.
+export interface InviteVerifyResult extends ResetVerifyResult {
+  fullName: string;
+  role: string | null;
 }
 
 export interface ForbiddenInfo {
